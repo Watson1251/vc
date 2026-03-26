@@ -1,0 +1,94 @@
+<!-- help-dialog.component.html -->
+<!-- Title bar -->
+<div class="rd-header">
+    <h2 class="rd-title">دليل استخدام خصائص "{{ getTitle() }}"</h2>
+    <button class="rd-close" type="button" aria-label="Close" (click)="onCancel()">
+        <i class="ri-close-line"></i>
+    </button>
+</div>
+
+<!-- Scrollable/filling content -->
+<div class="rd-content">
+    <div class="rd-body">
+        <!-- Tabs -->
+        <mat-tab-group class="rd-tabs" [(selectedIndex)]="activeIndex" (selectedIndexChange)="onTabChange($event)">
+            <mat-tab *ngFor="let t of tabs" [label]="t.label">
+                <!-- Split: 50/50 -->
+                <div class="rd-split">
+                    <!-- LEFT: Table -->
+                    <section class="rd-pane">
+                        <div class="rd-card">
+                            <div class="table-responsive rd-fill-scroll">
+                                <table class="table align-middle mb-0">
+                                    <thead class="table-light rd-sticky-thead">
+                                        <tr>
+                                            <!-- Render headers dynamically from t.columns -->
+                                            <th *ngFor="let c of t.columns; trackBy: trackByKey"
+                                                [ngClass]="{ 'text-center': c.key === 'index' }"
+                                                [style.width.%]="c.key === 'index' ? 10 : null">
+                                                {{ c.header }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <!-- Rows -->
+                                        <tr *ngFor="let row of t.rows; index as i">
+                                            <td *ngFor="let c of t.columns; trackBy: trackByKey"
+                                                [ngClass]="{ 'text-center': c.key === 'index' }">
+                                                <!-- Index cell -->
+                                                <ng-container *ngIf="c.key === 'index'; else valueCell">
+                                                    {{ i + 1 }}
+                                                </ng-container>
+                                                <!-- Value cells (e.g., title, action, …) -->
+                                                <ng-template #valueCell>
+                                                    {{ row[c.key] }}
+                                                </ng-template>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Empty state -->
+                                        <tr *ngIf="!t.rows?.length">
+                                            <td [attr.colspan]="t.columns.length" class="text-muted text-center">
+                                                لا توجد بيانات
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- RIGHT: Media -->
+                    <section class="rd-pane">
+                        <div class="rd-card rd-media">
+                            <ng-container *ngIf="mediaView as mv">
+                                <!-- VIDEO -->
+                                <video *ngIf="isVideo(mv)" class="rd-media-content rd-media-frame" [src]="mv.videoSrc"
+                                    autoplay muted playsinline preload="metadata" controls
+                                    (loadeddata)="onVideoLoaded($event)">
+                                </video>
+
+                                <!-- IMAGE / PLACEHOLDER -->
+                                <div *ngIf="isImage(mv)" class="rd-media-content">
+                                    <img class="rd-media-frame" [src]="mv.imgSrc" alt="media"
+                                        (error)="onImgError($event)" />
+                                </div>
+
+                                <!-- Fallback -->
+                                <div *ngIf="!isVideo(mv) && !isImage(mv)" class="rd-media-content">
+                                    <img class="rd-media-frame" [src]="placeholderUrl" alt="No media available" />
+                                </div>
+
+                                <!-- Optional caption
+                <div *ngIf="mv.title" class="rd-media-caption">
+                  {{ mv.title }}
+                </div> -->
+                            </ng-container>
+                        </div>
+                    </section>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+</div>

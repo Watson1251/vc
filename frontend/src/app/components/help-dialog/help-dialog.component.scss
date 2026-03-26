@@ -1,0 +1,266 @@
+/* help-dialog.component.scss */
+:host {
+    display: block;
+    direction: rtl;
+    height: 100%;
+    font-family: var(--arabic-font);
+}
+
+/* Root container */
+.help-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+/* ===== Header (copied style language you use) ===== */
+.rd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 6px;
+    border-bottom: 1px solid var(--bs-border-color, #e9ecef);
+}
+
+.rd-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.rd-close {
+    border: 0;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: #6c757d;
+}
+
+.rd-close:hover {
+    background: rgba(0, 0, 0, .04);
+}
+
+/* ===== Content / body flex chain ===== */
+.rd-content {
+    padding: 12px 16px 12px;
+    height: calc(100% - 56px);
+    /* header height compensation */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.rd-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+}
+
+/* Tabs occupy everything */
+.rd-tabs {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.rd-tabs .mat-mdc-tab-header {
+    flex: 0 0 auto;
+}
+
+.rd-tabs .mat-mdc-tab-body-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.mat-mdc-tab-body-wrapper {
+    height: 100% !important;
+}
+
+.rd-tabs .mat-mdc-tab-body {
+    height: 100%;
+}
+
+.rd-tabs .mat-mdc-tab-body-content {
+    height: 100%;
+    display: flex;
+    flex: 1 1 auto;
+}
+
+/* ===== Split 50/50 filling the tab ===== */
+.rd-split {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: grid;
+
+    /* Media gets 2x the space of the table */
+    grid-template-columns: 1fr 2fr;
+    gap: 16px;
+}
+
+.rd-pane {
+    min-height: 0;
+}
+
+/* Card look in your theme */
+.rd-card {
+    height: 100%;
+    border-radius: 14px;
+    border: 1px solid #e8eef6;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .04);
+    overflow: hidden;
+}
+
+/* Table: same spacing/fonts as app */
+th,
+td,
+button,
+input {
+    font-family: var(--arabic-font);
+}
+
+.table.align-middle> :not(caption)>*>* {
+    padding-top: .65rem;
+    padding-bottom: .65rem;
+}
+
+/* Make inner table area scrollable and fill */
+.rd-fill-scroll {
+    height: 100%;
+    max-height: 100%;
+    overflow: auto;
+}
+
+.rd-sticky-thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* Media container */
+.rd-media {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: transparent;
+    /* ✅ was #f6f9fc */
+    overflow: hidden;
+    /* prevent overflow */
+}
+
+/* Media frame: images & videos */
+.rd-media-frame {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    background: transparent;
+    /* ✅ remove any fallback background */
+}
+
+/* Ensure <video> follows same rules as <img> */
+.rd-media video.rd-media-frame {
+    object-fit: contain;
+}
+
+/* Placeholder special case */
+.rd-media-frame[src$="placeholder.png"] {
+    opacity: 0.8;
+    background: #f0f2f5;
+}
+
+.rd-media-content {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: transparent;
+    /* ✅ was #f6f9fc */
+}
+
+.rd-card.rd-media {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+label,
+button,
+input,
+span,
+.rd-error,
+.alert,
+.badge,
+.rd-title {
+    font-family: var(--arabic-font);
+}
+
+:host ::ng-deep .rd-tabs .mdc-tab__text-label {
+    font-family: var(--arabic-font) !important;
+}
+
+/* Increase row height by padding */
+.table.align-middle> :not(caption)>*>* {
+    padding-top: 1.2rem;
+    /* increase top padding */
+    padding-bottom: 1.2rem;
+    /* increase bottom padding */
+}
+
+/* Optional: enforce a minimum height */
+.table.align-middle tbody tr {
+    min-height: 60px;
+    /* or whatever height fits your design */
+}
+
+
+/* Responsive: stack panes on small screens */
+@media (max-width: 992px) {
+    .rd-split {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 🔑 make the wrapper fill */
+:host ::ng-deep .rd-tabs .mat-mdc-tab-body-wrapper {
+    height: 100% !important;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* the body + its content must also stretch */
+:host ::ng-deep .rd-tabs .mat-mdc-tab-body {
+    height: 100%;
+}
+
+:host ::ng-deep .rd-tabs .mat-mdc-tab-body-content {
+    height: 100%;
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 16px;
+    /* 👈 Add internal padding */
+    box-sizing: border-box;
+    /* keep padding inside bounds */
+}
+
+.rd-card.rd-media {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}

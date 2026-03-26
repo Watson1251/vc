@@ -1,0 +1,61 @@
+
+services:
+
+  frontend-vc:
+    image: frontend-vc:dev
+    container_name: frontend-vc
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfiles/Dockerfile.frontend.dev
+    ports:
+      - "4222:4200"
+    volumes:
+      - ../../frontend:/frontend
+    depends_on:
+      backend-vc:
+        condition: service_started
+    environment:
+      NODE_ENV: development
+    command: >
+      sh -c '
+        : "$${APP_TITLE:=بيئة تطويرية}";
+        : "$${COMPANY_NAME:=Company Name}";
+        envsubst < src/assets/env.template.js > src/assets/env.js &&
+        exec npm start
+      '
+
+  backend-vc:
+    ports:
+      - "3005:3000"
+    volumes:
+      - ../../backend:/backend
+      - ../../security/certs:/certs
+      - ../../utils/logger:/logger
+      - ../../utils/rabbitmq:/rabbitmq
+      - ../../security/src/secure.js:/secure.js
+      - ../../security/src/rsa.js:/rsa.js
+    command: npx nodemon server.js
+    environment:
+      NODE_ENV: development
+  
+  nemo:
+    volumes:
+      - ../../engines/nemo-engine:/nemo-engine
+      - ../../utils/rabbitmq:/rabbitmq
+      - ../../utils/logger:/logger
+      - ../../security/src/secure.py:/security/secure.py
+
+  vc:
+    volumes:
+      - ../../engines/vc:/vc
+      - ../../utils/rabbitmq:/rabbitmq
+      - ../../utils/logger:/logger
+      - ../../security/src/secure.py:/security/secure.py
+
+  mongo-vc:
+    ports:
+      - "27021:27017"
+
+  rabbitmq-vc:
+    ports:
+      - "15675:15672"

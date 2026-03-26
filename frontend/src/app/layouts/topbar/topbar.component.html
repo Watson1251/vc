@@ -1,0 +1,50 @@
+<header id="page-topbar" (window:scroll)="windowScroll()">
+    <div class="layout-width">
+        <div class="navbar-header d-flex justify-content-between align-items-center">
+            <!-- Left: Hamburger Button -->
+            <div class="d-flex align-items-center">
+                <button type="button"
+                    class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger shadow-none"
+                    id="topnav-hamburger-icon" (click)="toggleMobileMenu($event)">
+                    <span class="hamburger-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+            </div>
+
+            <!-- Middle: Material FABs (no Bootstrap classes here) -->
+            <div class="d-flex align-items-center gap-4">
+
+                <!-- <button mat-button (click)="navigateTo('/home')" [ngClass]="{'button-focus': currentRoute == '/home'}">
+                    <mat-icon>home</mat-icon>
+                    <span>الصفحة الرئيسية</span>
+                </button> -->
+
+                <!-- <button mat-button (click)="navigateTo('/management')"
+                    [ngClass]="{'button-focus': currentRoute == '/management'}"
+                    *appHasPerm="['ROLES_READ','USERS_READ']; mode: 'any'">
+                    <mat-icon>fingerprint</mat-icon>
+                    <span>إدارة النظام</span>
+                </button> -->
+
+            </div>
+
+            <!-- Right: User dropdown -->
+            <div class="dropdown ms-auto">
+                <div class="d-flex align-items-center gap-1 user-dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false" role="button" id="userDropdown">
+                    <span class="fw-bold">{{ username }}</span>
+                    <i class="ri-arrow-down-s-line"></i>
+                </div>
+
+                <ul class="dropdown-menu dropdown-menu-end text-end" aria-labelledby="userDropdown">
+                    <li>
+                        <button class="dropdown-item" (click)="logout()">تسجيل الخروج</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>

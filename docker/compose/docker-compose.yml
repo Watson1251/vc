@@ -1,0 +1,220 @@
+
+x-jwt-duration: &jwt-duration
+  JWT_EXPIRES_INITIAL: "24h"
+  JWT_EXPIRES_REFRESH: "24h"
+  
+x-rabbitmq-env: &rabbitmq-env
+  RABBITMQ_URL: rabbitmq-vc
+  RABBITMQ_PORT: 5672
+  RABBITMQ_USERNAME: admin
+  RABBITMQ_PASSWORD: admin
+  RABBIT_PREFETCH: 100
+  TARGET_TRAIN_QUEUE: target_train_queue
+  TARGET_CANCEL_QUEUE: target_cancel_queue
+  VC_MAX_CONCURRENCY: 4
+  TARGET_STATUS_QUEUE: target_status_queue
+
+x-seed-vc-env: &seed-vc-env
+  # Trainer defaults (read by SeedVCTrainer in vc container)
+  SEED_VC_CONFIG: configs/presets/config_dit_mel_seed_uvit_whisper_small_wavenet.yml
+  SEED_VC_BATCH_SIZE: "4"
+  SEED_VC_MAX_STEPS: "200"
+  SEED_VC_MAX_EPOCHS: "2"
+  SEED_VC_SAVE_EVERY: "100"
+  SEED_VC_NUM_WORKERS: "2"
+  # LR schedule
+  SEED_VC_BASE_LR: "3e-5"
+  SEED_VC_WARMUP_STEPS: "50"
+
+
+services:
+
+  frontend-vc:
+    environment:
+      <<: *jwt-duration
+      APP_TITLE: تطبيق استنساخ الصوت
+      COMPANY_NAME: مركز البحث والتطوير التقني
+
+  backend-vc:
+    image: backend-vc:base
+    container_name: backend-vc
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfiles/Dockerfile.backend
+    volumes:
+      - ../../security/certs:/certs
+      - ../../db/logs:/logs
+      - ../../db/media:/db/media
+
+      # - ../../backend:/backend
+      - ../../backend/controllers/auth.controller.js:/backend/controllers/auth.controller.js
+      - ../../backend/seeds/seed-sfx-defaults.js:/backend/seeds/seed-sfx-defaults.js
+      - ../../utils/logger:/logger
+      - ../../utils/rabbitmq:/rabbitmq
+      - ../../security/src/secure.js:/secure.js
+      - ../../security/src/rsa.js:/rsa.js
+    depends_on:
+      mongo-vc:
+        condition: service_healthy
+      rabbitmq-vc:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      <<: [*jwt-duration, *rabbitmq-env]
+      SERVICE_NAME: backend-vc
+      NODE_PATH: /backend/node_modules
+      VC_ENGINE_URL: http://vc:8000/
+      # MONGODB_URL: mongodb://mongo-vc:27017/vc_db?replicaSet=rs0
+      MONGODB_URL: mongodb://mongo-vc:27017/vc_db
+      UPLOAD_DIR: /db/media/
+
+      # --- LDAP settings ---
+      AUTH_TYPE: db  # "ldap" or "db"
+      LDAP_URL: ldap://ad.intercon.co.om
+      LDAP_BIND_DN: Administrator@ad.intercon.co.om
+      LDAP_BIND_PASSWORD: P@ssw0rd3
+      LDAP_SEARCH_BASE: dc=ad, dc=intercon, dc=co, dc=om
+      LDAP_SEARCH_FILTER: (sAMAccountName={{username}})
+      LDAP_REJECT_UNAUTHORIZED: false
+
+      # --- Development flag ---
+      USE_MOCK_AD: false
+
+  vc:
+    image: vc:base
+    container_name: vc
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfiles/Dockerfile.vc
+    shm_size: "10gb"
+    volumes:
+      - ../../security/certs:/certs
+      - ../../db/logs:/logs
+      - ../../db/media:/db/media
+
+      # - ../../engines/vc:/vc
+      - ../../utils/rabbitmq:/rabbitmq
+      - ../../utils/logger:/logger
+      - ../../security/src/secure.py:/security/secure.py
+    runtime: nvidia
+    # gpus: all
+    depends_on:
+      rabbitmq-vc:
+        condition: service_healthy
+      nemo:
+        condition: service_healthy
+    environment:
+      <<: [*rabbitmq-env, *seed-vc-env]
+      SERVICE_NAME: vc-engine
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      SHARED_TMP: /db/media/tmp
+      HF_OFFLINE: "1"
+      NEMO_API_URL: http://nemo:8000
+      NEMO_API_TIMEOUT: "300"
+      NEMO_API_HEALTH_TIMEOUT: "15"
+      NEMO_API_HEALTH_RETRIES: "8"
+      NEMO_API_HEALTH_RETRY_DELAY: "5"
+    command: >
+      bash -c "cd /vc &&
+        bash ./run.sh &&
+        tail -f /dev/null"
+
+  nemo:
+    image: nemo:base
+    container_name: nemo
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfiles/Dockerfile.nemo
+    shm_size: "10gb"
+    runtime: nvidia
+    # gpus: all
+    restart: always
+    volumes:
+      - ../../security/certs:/certs
+      - ../../db/logs:/logs
+      - ../../db/media:/db/media
+      - ../../engines/nemo-engine/models:/root/.cache   # <-- host folder
+
+      - ../../engines/nemo-engine:/nemo-engine
+      - ../../utils/rabbitmq:/rabbitmq
+      - ../../utils/logger:/logger
+      - ../../security/src/secure.py:/security/secure.py
+    environment:
+      SERVICE_NAME: nemo
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      # Must be >= longest /extract_embedding (etc.); else gunicorn SIGKILLs the worker mid-inference
+      GUNICORN_TIMEOUT: "600"
+      # Last resort if rebuilt image still mismatches host driver: "true" (very slow)
+      # NEMO_FORCE_CPU: "false"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-fsS",
+          "--max-time",
+          "10",
+          "http://127.0.0.1:8000/",
+        ]
+      interval: 15s
+      timeout: 12s
+      retries: 5
+      start_period: 180s
+    command: >
+      bash -c "cd /nemo-engine &&
+        bash ./run.sh &&
+        tail -f /dev/null"
+
+  mongo-vc:
+    image: mongo:6.0
+    container_name: mongo-vc
+    restart: always
+    privileged: true
+    volumes:
+      - mongo_data:/data/db
+    # IMPORTANT: no --replSet anywhere
+    command: ["--bind_ip_all","--dbpath","/data/db"]
+    # environment:
+    #   # optional auth; remove if you don't need it
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "127.0.0.1/admin", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-vc
+    restart: unless-stopped
+    depends_on:
+      mongo-vc:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo-vc:27017/vc_db
+      ME_CONFIG_BASICAUTH: "false"
+
+  rabbitmq-vc:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-vc
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    restart: unless-stopped
+    privileged: true
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mongo_data:
+  rabbitmq_data:

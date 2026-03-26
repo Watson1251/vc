@@ -1,0 +1,288 @@
+<div class="card-dialog" dir="rtl">
+    <div class="card w-100">
+        <!-- Header -->
+        <div class="card-header d-flex align-items-center gap-2">
+            <h3 class="card-title mb-0">{{ headerTitle }}</h3>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+
+            <!-- DELETE MODE (message only) -->
+            <ng-container *ngIf="mode === 'delete'; else createEditTpl">
+                <p class="mb-3">
+                    هل أنت متأكد من حذف الهدف
+                    "<span class="fw-bold">{{ data.initial?.name || 'بدون اسم' }}</span>"؟
+                    هذا الإجراء لا يمكن التراجع عنه.
+                </p>
+            </ng-container>
+
+            <!-- CREATE/EDIT (existing stepper) -->
+            <ng-template #createEditTpl>
+                <div class="scrollable-stepper">
+                    <form [formGroup]="formGroup">
+                        <mat-horizontal-stepper (selectionChange)="onStepChange($event)" linear #stepper>
+                            <!-- STEP 1 -->
+                            <mat-step [stepControl]="infoGroup">
+                                <form [formGroup]="infoGroup">
+                                    <ng-template matStepLabel>بيانات الهدف</ng-template>
+
+                                    <!-- Name -->
+                                    <div class="mb-3">
+                                        <label class="form-label label-rtl" for="targetName">اسم الهدف</label>
+                                        <input id="targetName" type="text" class="form-control rtl-input"
+                                            placeholder="اسم الهدف" formControlName="name" autocomplete="off"
+                                            autocorrect="off" autocapitalize="off" spellcheck="false"
+                                            [class.is-invalid]="infoGroup.get('name')?.invalid && infoGroup.get('name')?.touched"
+                                            required />
+                                        <div class="invalid-feedback"
+                                            *ngIf="infoGroup.get('name')?.hasError('required')">
+                                            الرجاء إدخال اسم الهدف.
+                                        </div>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="mb-3">
+                                        <label class="form-label label-rtl" for="targetDesc">الوصف</label>
+                                        <textarea id="targetDesc" class="form-control rtl-input"
+                                            placeholder="الوصف (اختياري)" rows="3" formControlName="description"
+                                            autocomplete="off" autocorrect="off" autocapitalize="off"
+                                            spellcheck="false"></textarea>
+                                    </div>
+
+                                    <!-- ===================== STEP 1 (Reference) ===================== -->
+                                    <!-- Reference Audio -->
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label label-rtl mb-0">المادة الصوتية المرجعية</label>
+                                        <small class="text-muted fst-italic">
+                                            الرجاء استخدام تسجيل صوتي واضح للهدف محل الاستنساخ
+                                        </small>
+                                    </div>
+
+                                    <!-- ⬇️ Show dropzone OR inline preview (mutually exclusive) -->
+                                    <ng-container *ngIf="previewRefIndex === null; else refSinglePreview">
+                                        <app-dropfile [isTitle]="false" [maxFiles]="1" acceptedTypes="audio/*, video/*"
+                                            (filesUploaded)="onRefFilesUploaded($event)">
+                                        </app-dropfile>
+                                    </ng-container>
+
+                                    <!-- If we have one file: show inline preview + Remove -->
+                                    <ng-template #refSinglePreview>
+                                        <div class="preview-surface mb-2" *ngIf="referenceFiles[0] as refFile">
+                                            <ng-container *ngIf="getId(refFile) as refId">
+                                                <app-wavesurfer [fileId]="refId" [autoLoad]="true" [enhanced]="false"
+                                                    [showRegionOverlay]="false" [showRegionRemove]="false">
+                                                </app-wavesurfer>
+                                            </ng-container>
+
+                                            <div class="d-flex justify-content-end mt-2">
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    (click)="onDeleteRefFile(refFile, 0)" title="حذف الملف">
+                                                    حذف
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </ng-template>
+
+                                    <!-- Reference file list -->
+                                    <!-- <div class="uploaded-list mt-2" *ngIf="referenceFiles.length">
+                                        <div class="uploaded-item d-flex align-items-center justify-content-between mb-2 p-2 border rounded"
+                                            *ngFor="let f of referenceFiles; let i = index">
+                                            <span class="text-truncate me-2">{{ (f.filename || f.name || getId(f)) |
+                                                slice:0:90 }}</span>
+
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                    (click)="toggleRefPreview(i)"
+                                                    [attr.aria-pressed]="previewRefIndex === i">
+                                                    {{ previewRefIndex === i ? 'إخفاء المعاينة' : 'معاينة' }}
+                                                </button>
+
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    (click)="onDeleteRefFile(f, i)" title="حذف الملف">
+                                                    حذف
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div> -->
+
+                                </form>
+                            </mat-step>
+
+                            <!-- STEP 2 -->
+                            <mat-step [stepControl]="trainGroup">
+                                <form [formGroup]="trainGroup">
+                                    <ng-template matStepLabel>ملفات التدريب</ng-template>
+
+                                    <!-- ===================== STEP 2 (Training) ===================== -->
+                                    <!-- Training Audio -->
+                                    <!-- Reference Audio -->
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label label-rtl mb-0">المواد الصوتية للتدريب</label>
+                                        <small class="text-muted fst-italic">
+                                            كلما زادت مدة المواد الصوتية للهدف زادت دقة الاستنساخ
+                                        </small>
+                                    </div>
+
+                                    <!-- ⬇️ Show dropzone OR inline preview (mutually exclusive) -->
+                                    <ng-container *ngIf="previewTrainIndex === null; else trainPreviewBlock">
+                                        <app-dropfile [isTitle]="false" [maxFiles]="100" acceptedTypes="audio/*"
+                                            (filesUploaded)="onTrainFilesUploaded($event)">
+                                        </app-dropfile>
+                                    </ng-container>
+
+                                    <ng-template #trainPreviewBlock>
+                                        <div class="preview-surface mb-2">
+                                            <ng-container *ngIf="trainFiles[previewTrainIndex!] as trFile">
+                                                <ng-container *ngIf="getId(trFile) as trainId">
+                                                    <app-wavesurfer [fileId]="trainId" [autoLoad]="true"
+                                                        [enhanced]="false" [showRegionOverlay]="false"
+                                                        [showRegionRemove]="false">
+                                                    </app-wavesurfer>
+                                                </ng-container>
+                                            </ng-container>
+                                        </div>
+                                    </ng-template>
+
+                                    <!-- Training file list -->
+                                    <div class="uploaded-list mt-2" *ngIf="trainFiles.length">
+                                        <div class="uploaded-item d-flex align-items-center justify-content-between mb-2 p-2 border rounded"
+                                            *ngFor="let f of trainFiles; let i = index">
+                                            <span class="text-truncate me-2">{{ (f.filename || f.name || getId(f)) |
+                                                slice:0:90 }}</span>
+
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                    (click)="toggleTrainPreview(i)"
+                                                    [attr.aria-pressed]="previewTrainIndex === i">
+                                                    {{ previewTrainIndex === i ? 'إخفاء المعاينة' : 'معاينة' }}
+                                                </button>
+
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    (click)="onDeleteTrainFile(f, i)" title="حذف الملف">
+                                                    حذف
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </mat-step>
+
+                            <!-- STEP 3 -->
+                            <mat-step>
+                                <ng-template matStepLabel>مراجعة وتأكيد</ng-template>
+
+                                <div class="review-section p-3 border rounded">
+
+                                    <!-- Header line -->
+                                    <div class="review-row">
+                                        <div class="review-label">الاسم</div>
+                                        <div class="review-value">{{ infoGroup.value.name }}</div>
+                                    </div>
+
+                                    <div class="review-row">
+                                        <div class="review-label">الوصف</div>
+                                        <div class="review-value text-muted"
+                                            [class.text-body]="infoGroup.value.description?.trim()?.length">
+                                            {{ infoGroup.value.description?.trim() || '—' }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Reference files -->
+                                    <!-- Reference file (single) -->
+                                    <div class="review-row">
+                                        <div class="review-label">الملف المرجعي</div>
+                                        <div class="review-value">
+                                            <ng-container *ngIf="referenceFiles.length; else noRef">
+                                                <span class="chip" dir="ltr">
+                                                    {{ (referenceFiles[0].filename || referenceFiles[0].name ||
+                                                    referenceFiles[0].id) | slice:0:70 }}
+                                                </span>
+                                            </ng-container>
+                                            <ng-template #noRef>
+                                                <span class="text-muted">لا يوجد</span>
+                                            </ng-template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Training files -->
+                                    <div class="review-row">
+                                        <div class="review-label d-flex align-items-center gap-2">
+                                            <span>ملفات التدريب</span>
+                                            <span class="count-chip" *ngIf="trainFiles.length">{{ trainFiles.length
+                                                }}</span>
+                                        </div>
+
+                                        <div class="review-value">
+                                            <ng-container *ngIf="trainFiles.length; else noTrain">
+                                                <div class="chips-wrap">
+                                                    <!-- Show up to 3 chips -->
+                                                    <span class="chip" *ngFor="let f of firstN(trainFiles, 3)"
+                                                        dir="ltr">
+                                                        {{ (f.filename || f.name || f.id) | slice:0:70 }}
+                                                    </span>
+
+                                                    <!-- If more, show "+N" -->
+                                                    <span class="chip chip-more"
+                                                        *ngIf="remainderCount(trainFiles, 3) > 0" dir="rtl"
+                                                        [attr.aria-label]="'+' + remainderCount(trainFiles, 3) + ' أخرى'">
+                                                        +{{ remainderCount(trainFiles, 3) }} أخرى
+                                                    </span>
+                                                </div>
+                                            </ng-container>
+                                            <ng-template #noTrain>
+                                                <span class="text-muted">لا توجد ملفات</span>
+                                            </ng-template>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </mat-step>
+                        </mat-horizontal-stepper>
+                    </form>
+                </div>
+            </ng-template>
+        </div>
+
+        <!-- Footer Navigation -->
+        <div class="card-footer d-flex justify-content-between gap-2">
+            <!-- DELETE footer -->
+            <ng-container *ngIf="mode === 'delete'; else stepperFooter">
+                <span></span>
+                <div class="ms-auto d-flex gap-2">
+                    <button class="btn btn-outline-secondary" type="button" (click)="onCancel()">إلغاء</button>
+                    <button class="btn btn-danger" type="button" (click)="onConfirm()">تأكيد الحذف</button>
+                </div>
+            </ng-container>
+
+            <!-- CREATE/EDIT footer -->
+            <ng-template #stepperFooter>
+                <!-- Previous -->
+                <button class="btn btn-outline-secondary" type="button" *ngIf="stepIndex > 0" (click)="goPrev()">
+                    السابق
+                </button>
+
+                <!-- Right-aligned buttons -->
+                <div class="ms-auto d-flex gap-2">
+                    <!-- Dynamic Next -->
+                    <button *ngIf="stepIndex < 2" class="btn btn-primary" type="button" (click)="goNext()"
+                        [disabled]="isNextDisabled()">
+                        التالي
+                    </button>
+
+                    <!-- Confirm -->
+                    <button *ngIf="stepIndex === 2" class="btn btn-success" type="button" (click)="onConfirm()">
+                        تأكيد
+                    </button>
+
+                    <!-- Cancel -->
+                    <button class="btn btn-outline-danger" type="button" (click)="onCancel()">إلغاء</button>
+                </div>
+            </ng-template>
+        </div>
+
+
+    </div>
+</div>

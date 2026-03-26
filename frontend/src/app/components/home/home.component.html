@@ -1,0 +1,227 @@
+<div class="container-fluid">
+    <div class="row g-3 align-items-stretch">
+        <div class="col order-lg-1">
+            <div class="card w-100" style="margin-top: 50px;">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <h3 class="card-title">سجل الاستنساخ</h3>
+                    <div class="flex-grow-1"></div>
+                    <button type="button" class="info-3d-btn" (click)="onInfoClick('clonelog')"
+                        matTooltip="دليل المستخدم" aria-label="مساعدة">
+                        <span class="info-italic">i</span>
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <!-- Toolbar -->
+                    <div class="d-flex align-items-stretch mb-3 w-100 gap-2">
+                        <!-- Global search -->
+                        <div class="input-group flex-grow-1 flex-row-reverse">
+                            <span class="input-group-text"><i class="ri-search-line"></i></span>
+                            <input type="text" class="form-control rtl-input" placeholder="ابحث ضمن سجل الاستنساخ..."
+                                [(ngModel)]="globalSearch" (input)="applyFilter()" style="min-width: 0;" />
+                        </div>
+
+                        <!-- Add clone action (wire up later if you have a dialog) -->
+                        <button *ngIf="canCreate"
+                            class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 px-3"
+                            style="white-space: nowrap;" (click)="onAddCloneAction()">
+                            <i class="ri-add-circle-line ms-1"></i> إضافة إجراء استنساخ
+                        </button>
+
+                        <!-- Refresh -->
+                        <button
+                            class="btn btn-outline-warning d-flex align-items-center justify-content-center h-100 px-3"
+                            style="white-space: nowrap;" (click)="refresh()">
+                            <i class="ri-refresh-line ms-1"></i> تحديث
+                        </button>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="p-3 preview" *ngIf="canRead; else noRead">
+                        <!-- Preview player (shown when chip is clicked) -->
+                        <div class="mb-3" *ngIf="previewFileId">
+                            <app-wavesurfer [fileId]="previewFileId" [autoLoad]="true" [enhanced]="false"
+                                [showRegionOverlay]="previewShowRegion" [showRegionRemove]="false">
+                            </app-wavesurfer>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center align-middle" style="width:6%">ت</th>
+                                        <th class="text-center align-middle" style="width:10%">الهدف</th>
+                                        <th class="text-center align-middle">السيناريو</th>
+                                        <th class="text-center align-middle">مقطع محتوى النسخ</th>
+                                        <th class="text-center align-middle">الصوت المرجعي للهدف</th>
+                                        <th class="text-center align-middle">التأثير الصوتي</th>
+                                        <th class="text-center align-middle">النتيجة</th>
+                                        <th class="text-center align-middle" style="width:10%">الإجراءات</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let a of pagedActions; index as i2" (click)="onRowSelect(a)"
+                                        [class.selected-row]="isSelected(a)" [attr.aria-selected]="isSelected(a)"
+                                        style="cursor: pointer;">
+
+                                        <!-- # -->
+                                        <td class="text-center">
+                                            {{ pageIndex * pageSize + i2 + 1 }}
+                                        </td>
+
+                                        <!-- Target (name + description) -->
+                                        <td class="text-center text-break">
+                                            <div class="fw-bold">{{ a.target?.name || '—' }}</div>
+                                            <div class="text-muted small">{{ a.target?.description || '' }}</div>
+                                        </td>
+
+                                        <!-- Scenario -->
+                                        <td class="text-center text-break">
+                                            <span class="text-muted" *ngIf="!(a.scenario || '').trim()">—</span>
+                                            <span *ngIf="(a.scenario || '').trim()">{{ a.scenario }}</span>
+                                        </td>
+
+                                        <!-- Content audio -->
+                                        <td class="text-center">
+                                            <ng-container
+                                                *ngIf="(a.contentAudio?.id ?? a.contentAudioId) as caId; else noContent">
+                                                <span dir="ltr" class="chip chip-clickable"
+                                                    [title]="a.contentAudio?.filename || caId"
+                                                    (click)="$event.stopPropagation(); onChipClick(caId, false)">
+                                                    {{ (a.contentAudio?.filename || caId) | slice:0:25 }}
+                                                </span>
+                                            </ng-container>
+                                            <ng-template #noContent>
+                                                <span class="text-muted">لا يوجد</span>
+                                            </ng-template>
+                                        </td>
+
+                                        <!-- Reference audio -->
+                                        <td class="text-center">
+                                            <ng-container
+                                                *ngIf="(a.referenceAudio?.id ?? a.referenceAudioId) as raId; else noRef">
+                                                <span dir="ltr" class="chip chip-clickable"
+                                                    [title]="a.referenceAudio?.filename || raId"
+                                                    (click)="$event.stopPropagation(); onChipClick(raId, false)">
+                                                    {{ (a.referenceAudio?.filename || raId) | slice:0:25 }}
+                                                </span>
+                                            </ng-container>
+                                            <ng-template #noRef>
+                                                <span class="text-muted">لا يوجد</span>
+                                            </ng-template>
+                                        </td>
+
+                                        <!-- Sound effect column chip -->
+                                        <td class="text-center">
+                                            <ng-container
+                                                *ngIf="(a.soundEffect?.id ?? a.soundEffectId) as seId; else noSE">
+                                                <span dir="ltr" class="chip chip-clickable"
+                                                    [title]="getSoundEffectFilename(a)"
+                                                    (click)="$event.stopPropagation(); onChipClick(seId, true, a)">
+                                                    {{ getSoundEffectFilename(a) | slice:0:25 }}
+                                                </span>
+                                            </ng-container>
+                                            <ng-template #noSE>
+                                                <span class="text-muted">لا يوجد</span>
+                                            </ng-template>
+                                        </td>
+
+                                        <!-- Result -->
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center align-items-center gap-2">
+
+                                                <!-- Status badge -->
+                                                <span class="badge" [ngClass]="statusClass(a.status)">
+                                                    {{ statusLabel(a.status) }}
+                                                </span>
+
+                                                <!-- ✅ cloned result chip when DONE and output exists -->
+                                                <ng-container *ngIf="a.status === 'DONE' && hasOutputFile(a)">
+                                                    <span dir="ltr" class="chip chip-clickable"
+                                                        [title]="getOutputFilename(a)"
+                                                        (click)="$event.stopPropagation(); onResultChipClick(a)">
+                                                        {{ getOutputFilename(a) | slice:0:25 }}
+                                                    </span>
+                                                </ng-container>
+
+                                            </div>
+                                        </td>
+
+
+                                        <!-- Actions -->
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+
+                                                <!-- Schedule / Retry -->
+                                                <button class="btn btn-sm"
+                                                    [ngClass]="canRetry(a) ? 'btn-outline-warning' : 'btn-outline-success'"
+                                                    type="button"
+                                                    [title]="canRetry(a) ? 'إعادة المحاولة' : 'جدولة الاستنساخ'"
+                                                    (click)="$event.stopPropagation(); onScheduleClone(a)"
+                                                    *ngIf="canScheduleClone(a)">
+                                                    <i class="ri-cpu-line" *ngIf="!canRetry(a)"></i>
+                                                    <i class="ri-refresh-line" *ngIf="canRetry(a)"></i>
+                                                </button>
+
+                                                <!-- Cancel -->
+                                                <button class="btn btn-sm btn-outline-secondary" type="button"
+                                                    title="إلغاء الجدولة/الإيقاف"
+                                                    (click)="$event.stopPropagation(); onCancelClone(a)"
+                                                    *ngIf="canCancelClone(a)">
+                                                    <i class="ri-close-circle-line"></i>
+                                                </button>
+
+                                                <!-- Edit -->
+                                                <button class="btn btn-sm btn-outline-primary" type="button"
+                                                    title="تعديل" [disabled]="!canUpdate"
+                                                    (click)="$event.stopPropagation(); onEditAction(a)">
+                                                    <i class="ri-edit-2-line"></i>
+                                                </button>
+
+                                                <!-- Delete -->
+                                                <button class="btn btn-sm btn-outline-danger" type="button" title="حذف"
+                                                    [disabled]="!canDelete"
+                                                    (click)="$event.stopPropagation(); onDeleteAction(a)">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+
+                                                <button class="btn btn-sm btn-outline-success" type="button"
+                                                    title="تنزيل النتيجة"
+                                                    *ngIf="a.status === 'DONE' && hasOutputFile(a)"
+                                                    (click)="$event.stopPropagation(); onDownload(a)">
+                                                    <i class="ri-download-2-line"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+
+                                    <tr *ngIf="pagedActions.length === 0">
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            لا يوجد إجراءات
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                        <div *ngIf="filteredActions.length > 5">
+                            <app-paginator [length]="filteredActions.length" [pageSize]="pageSize"
+                                [pageIndex]="pageIndex" (pageChange)="onPageChange($event)">
+                            </app-paginator>
+                        </div>
+                    </div>
+
+                    <!-- Fallback when no permission -->
+                    <ng-template #noRead>
+                        <div class="p-3 preview d-flex justify-content-center">
+                            <span class="text-muted empty-tweets-text">لا تملك صلاحية عرض الإجراءات</span>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

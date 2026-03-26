@@ -1,0 +1,28 @@
+<!-- Begin page -->
+<div id="layout-wrapper" class="layout">
+    <!-- Top Bar -->
+    <app-topbar (mobileMenuButtonClicked)="onToggleMobileMenu()"></app-topbar>
+
+    <!-- Body area (sidebar + main) -->
+    <div class="layout-body">
+        <!-- Side Bar -->
+        <app-sidebar></app-sidebar>
+
+        <!-- Main column -->
+        <div class="main-content" role="main">
+            <div class="page-content">
+                <div class="container-fluid">
+                    <!-- Main Content -->
+                    <router-outlet></router-outlet>
+                </div>
+            </div>
+
+            <!-- Footer lives INSIDE flex column -->
+            <app-footer></app-footer>
+        </div>
+    </div>
+</div>
+
+<!-- Right Side Bar -->
+<app-rightsidebar (settingsButtonClicked)="onSettingsButtonClicked()"></app-rightsidebar>
+<ngx-spinner type="ball-clip-rotate"></ngx-spinner>

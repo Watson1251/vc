@@ -1,0 +1,160 @@
+.no-items-text {
+    font-family: var(--arabic-font);
+    font-weight: bolder;
+    color: rgba(54, 59, 57, 0.774);
+    padding-bottom: 200px;
+}
+
+.card-title {
+    font-family: var(--arabic-font);
+    font-weight: bolder;
+}
+
+th,
+td,
+button,
+input {
+    font-family: var(--arabic-font);
+}
+
+/* Target the dialog container */
+::ng-deep .mat-mdc-dialog-container.role-dialog-panel {
+    border-radius: 12px;
+    padding: 1rem;
+    font-family: var(--arabic-font);
+}
+
+/* Title size inside your dialog */
+::ng-deep .role-dialog-panel .modal-title {
+    font-size: 1.5rem;
+    /* bigger than default */
+    font-weight: 700;
+    font-family: var(--arabic-font);
+}
+
+/* management.component.scss */
+.rtl-input {
+    direction: rtl;
+    text-align: right !important;
+}
+
+.rtl-input::placeholder {
+    text-align: right;
+    opacity: .6;
+}
+
+/* container for all groups inside the cell */
+.perm-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem .6rem;
+    justify-content: center;
+}
+
+/* group wrapper: keeps title + list together */
+.gwrap {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    /* space between groups even when list is visible */
+    margin-block: .125rem;
+
+    /* show list on hover/focus of the whole group area */
+    &:hover .glist,
+    &:focus-within .glist {
+        display: inline-flex;
+    }
+}
+
+/* title chip (group) */
+.gchip {
+    cursor: default;
+    line-height: 1.6;
+    padding-inline: .65rem;
+    user-select: none;
+    /* slight emphasis */
+    font-weight: 600;
+}
+
+/* hidden by default; appears inline after the title chip */
+.glist {
+    display: none;
+    /* toggled on hover of .gwrap */
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .35rem;
+
+    /* make it read like a list after the title chip */
+    margin-inline-start: .5rem;
+    /* RTL-aware logical prop */
+}
+
+/* the inner permission chips — subtler look */
+.list-chip {
+    background: transparent;
+    border: 1px dashed var(--bs-border-color, #e5e7eb);
+    color: var(--bs-secondary-color, #6b7280);
+    font-weight: 500;
+    padding-inline: .55rem;
+    line-height: 1.55;
+}
+
+/* whole permissions area */
+.perm-inline {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    /* space between rows */
+}
+
+/* one visual row that holds up to 3 groups */
+.perm-row {
+    display: flex;
+    justify-content: center;
+    /* center groups within the row */
+    gap: .8rem;
+    /* space between groups */
+    flex-wrap: nowrap;
+    /* exactly 3 per row because we chunked */
+}
+
+/* each group wrapper (unchanged logic for hover) */
+.gwrap {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+
+    &:hover .glist,
+    &:focus-within .glist {
+        display: inline-flex;
+    }
+}
+
+.gchip {
+    cursor: default;
+    font-weight: 600;
+    line-height: 1.6;
+    padding-inline: .65rem;
+}
+
+.glist {
+    display: none;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-inline-start: .5rem;
+}
+
+.list-chip {
+    background: transparent;
+    border: 1px dashed var(--bs-border-color, #e5e7eb);
+    color: var(--bs-secondary-color, #6b7280);
+    font-weight: 500;
+    padding-inline: .55rem;
+    line-height: 1.55;
+}
+
+/* optional: shrink to 2 per row on smaller screens by re-chunking if you want,
+   but since we chunk in the template, desktop will always be 3 per row. */

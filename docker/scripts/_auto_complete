@@ -1,0 +1,81 @@
+# bash completion for master.sh and direct script calls
+
+_docker_scripts_completion() {
+    local cur prev script subcmd mode services
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    script="${COMP_WORDS[0]}"
+    local global_flags="--prod"
+
+    # This file lives in /docker/scripts/_auto_complete → project_root is /docker
+    local project_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+    local compose_dir="${project_root}/compose"
+
+    # Treat master.sh AND the wrapper function names (master/m) as the main entry
+    if [[ "$(basename "$script")" == "master.sh" || "$script" == "master" || "$script" == "m" ]]; then
+        # First arg → complete subcommands (list ./scripts/*.sh basenames)
+        if [[ $COMP_CWORD -eq 1 ]]; then
+            local cmds
+            cmds=$(cd "${project_root}/scripts" 2>/dev/null && for f in *.sh; do [[ -e "$f" ]] && basename "$f" .sh; done)
+            COMPREPLY=( $(compgen -W "${cmds} ${global_flags}" -- "$cur") )
+            return 0
+        fi
+
+        subcmd="${COMP_WORDS[1]}"
+
+        # Global flags completion when typing a flag
+        if [[ "$cur" == --* ]]; then
+            COMPREPLY=( $(compgen -W "${global_flags}" -- "$cur") )
+            return 0
+        fi
+
+        # Determine mode by presence of --prod anywhere on the line
+        mode="dev"
+        for word in "${COMP_WORDS[@]}"; do
+            [[ "$word" == "--prod" ]] && mode="prod"
+        done
+
+        case "$subcmd" in
+            build|up|down|restart|logs|run|list|save|load)
+                services=$(docker compose \
+                    -f "${compose_dir}/docker-compose.yml" \
+                    -f "${compose_dir}/docker-compose.${mode}.yml" \
+                    config --services 2>/dev/null)
+
+                [[ -n "$services" ]] && COMPREPLY=( $(compgen -W "${services} ${global_flags}" -- "$cur") )
+                ;;
+        esac
+        return 0
+    fi
+
+    # Handle direct calls like ./scripts/up.sh (when inside /docker)
+    subcmd="$(basename "$script" .sh)"
+    mode="dev"
+    for word in "${COMP_WORDS[@]}"; do
+        [[ "$word" == "--prod" ]] && mode="prod"
+    done
+
+    case "$subcmd" in
+        build|up|down|restart|logs|run|list|save|load)
+            services=$(docker compose \
+                -f "${compose_dir}/docker-compose.yml" \
+                -f "${compose_dir}/docker-compose.${mode}.yml" \
+                config --services 2>/dev/null)
+
+            [[ -n "$services" ]] && COMPREPLY=( $(compgen -W "${services} ${global_flags}" -- "$cur") )
+            ;;
+    esac
+}
+
+# Keep these for when you run the scripts from inside /docker
+complete -F _docker_scripts_completion ./build.sh   && echo "[!] build.sh"
+complete -F _docker_scripts_completion ./up.sh      && echo "[!] up.sh"
+complete -F _docker_scripts_completion ./down.sh    && echo "[!] down.sh"
+complete -F _docker_scripts_completion ./restart.sh && echo "[!] restart.sh"
+complete -F _docker_scripts_completion ./logs.sh    && echo "[!] logs.sh"
+complete -F _docker_scripts_completion ./list.sh    && echo "[!] list.sh"
+complete -F _docker_scripts_completion ./save.sh    && echo "[!] save.sh"
+complete -F _docker_scripts_completion ./load.sh    && echo "[!] load.sh"
+complete -F _docker_scripts_completion ./run.sh     && echo "[!] run.sh"
+complete -F _docker_scripts_completion ./master.sh  && echo "[!] master.sh"

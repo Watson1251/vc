@@ -1,0 +1,36 @@
+FROM nvcr.io/nvidia/nemo:23.06
+
+# Prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV PIP_ROOT_USER_ACTION=ignore
+
+# OS deps (audio & runtime)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ffmpeg sox libsndfile1 libgl1-mesa-glx iproute2 \
+    build-essential python3-venv curl wget git cmake && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create and activate a venv for app-level Python deps
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv ${VIRTUAL_ENV}
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+
+# Copy app code
+COPY engines/nemo-engine /nemo-engine
+WORKDIR /nemo-engine
+
+# Shared logger
+COPY utils/logger /logger
+
+# RUN pip install --no-cache-dir "nemo_toolkit[asr]"
+
+# Install Python packages via your script
+RUN pip install --upgrade pip && \
+    bash /nemo-engine/env/install.sh
+
+EXPOSE 8000
+
+# Default to a shell; your compose can override command to run the server
+CMD ["/bin/bash"]

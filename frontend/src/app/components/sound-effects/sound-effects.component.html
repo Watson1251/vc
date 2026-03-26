@@ -1,0 +1,200 @@
+<div class="container-fluid">
+    <div class="row g-3 align-items-stretch">
+        <div class="col order-lg-1">
+            <div class="card w-100" style="margin-top: 50px;">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <h3 class="card-title">مكتبة المؤثرات الصوتية</h3>
+                    <div class="flex-grow-1"></div>
+                    <button type="button" class="info-3d-btn" (click)="onInfoClick('soundeffects')"
+                        matTooltip="دليل المستخدم" aria-label="مساعدة">
+                        <span class="info-italic">i</span>
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <!-- Toolbar -->
+                    <div class="d-flex align-items-stretch mb-3 w-100 gap-2">
+                        <!-- Global search -->
+                        <div class="input-group flex-grow-1 flex-row-reverse">
+                            <span class="input-group-text"><i class="ri-search-line"></i></span>
+                            <input type="text" class="form-control rtl-input" placeholder="ابحث ضمن المؤثرات الصوتية..."
+                                [(ngModel)]="searchTerm" (input)="applyFilter()" style="min-width:0;" />
+                        </div>
+
+                        <!-- Add type -->
+                        <button
+                            class="btn btn-outline-success d-flex align-items-center justify-content-center h-100 px-3"
+                            style="white-space: nowrap;" (click)="onAddType()">
+                            <i class="ri-add-line ms-1"></i> فئة جديدة
+                        </button>
+
+                        <!-- Edit / Delete type -->
+                        <ng-container *ngIf="types.length > 0">
+                            <button
+                                class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 px-3"
+                                style="white-space: nowrap;" (click)="getActiveType() && onTypeEdit(getActiveType()!)"
+                                [disabled]="!hasActiveType">
+                                <i class="ri-edit-2-line ms-1"></i> تعديل الفئة
+                            </button>
+
+                            <button
+                                class="btn btn-outline-danger d-flex align-items-center justify-content-center h-100 px-3"
+                                style="white-space: nowrap;" (click)="onDeleteType()" [disabled]="!hasActiveType">
+                                <i class="ri-delete-bin-line ms-1"></i> حذف الفئة
+                            </button>
+                        </ng-container>
+
+                        <!-- Add sound effect (show only if there is a selected/active category) -->
+                        <button *ngIf="canCreateEffects && hasActiveType"
+                            class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 px-3"
+                            style="white-space: nowrap;" (click)="onAddEffect()">
+                            <i class="ri-add-circle-line ms-1"></i> إضافة مؤثر
+                        </button>
+
+                        <!-- Refresh -->
+                        <button
+                            class="btn btn-outline-warning d-flex align-items-center justify-content-center h-100 px-3"
+                            style="white-space: nowrap;" (click)="refresh()">
+                            <i class="ri-refresh-line ms-1"></i> تحديث
+                        </button>
+                    </div>
+
+                    <!-- Empty types state -->
+                    <ng-container *ngIf="types.length === 0; else tabsBlock">
+                        <div class="empty-cats text-center" [attr.role]="canCreateType ? 'button' : null"
+                            [attr.tabindex]="canCreateType ? '0' : null"
+                            [attr.aria-disabled]="canCreateType ? null : 'true'" (click)="canCreateType && onAddType()"
+                            (keyup.enter)="canCreateType && onAddType()" [class.is-clickable]="canCreateType">
+                            <span class="empty-cats-text">لا يوجد فئات لمكتبات المؤثرات الصوتية</span>
+                        </div>
+                    </ng-container>
+
+                    <!-- Tabs + content -->
+                    <!-- Tabs + content -->
+                    <ng-template #tabsBlock>
+                        <div class="libs-tabbar d-flex align-items-center gap-2 mb-3">
+                            <mat-tab-group class="flex-grow-1" [selectedIndex]="selectedMatIndex"
+                                (selectedIndexChange)="onTabIndexChange($event)">
+
+                                <mat-tab *ngFor="let t of types; let i = index">
+                                    <ng-template mat-tab-label>
+                                        <span class="tab-title">
+                                            {{ t.soundEffectType }}
+                                            <span class="badge rounded-pill ms-2"
+                                                [ngClass]="getEffectCount(t.id) === 0 ? 'badge-danger' : 'badge-secondary'">
+                                                {{ getEffectCount(t.id) === 0 ? 'ﻻ توجد مؤثرات' : getEffectCount(t.id)
+                                                }}
+                                            </span>
+                                        </span>
+                                    </ng-template>
+
+                                    <!-- Tab panel body -->
+                                    <div class="p-3 preview" *ngIf="canReadEffects; else noEffectsRead">
+                                        <div class="table-responsive">
+                                            <table class="table align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="text-center align-middle" style="width:6%">ت</th>
+                                                        <th class="text-center align-middle" style="width:18%">وصف
+                                                            المؤثر</th>
+                                                        <th class="text-center align-middle">معاينة الملف الصوتي</th>
+                                                        <th class="text-center align-middle" style="width:20%">الإجراءات
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    <tr *ngFor="let se of pagedEffects; index as i2"
+                                                        (click)="onRowSelectEffect(se)"
+                                                        [class.selected-row]="isEffectSelected(se)"
+                                                        [attr.aria-selected]="isEffectSelected(se)"
+                                                        style="cursor: pointer;">
+                                                        <!-- ت -->
+                                                        <td class="text-center">
+                                                            {{ pageIndex * pageSize + i2 + 1 }}
+                                                        </td>
+
+                                                        <!-- وصف المؤثر -->
+                                                        <td class="text-center text-break">
+                                                            {{ se.name }}
+                                                        </td>
+
+                                                        <!-- معاينة الملف الصوتي -->
+                                                        <td class="text-center">
+                                                            <ng-container *ngIf="getFileId(se) as fid; else noFile">
+                                                                <app-wavesurfer [fileId]="fid" [autoLoad]="false"
+                                                                    [enhanced]="false"
+                                                                    [initialRegion]="initialRegionFor(se)"
+                                                                    [showRegionOverlay]="true"
+                                                                    [showRegionRemove]="false">
+                                                                </app-wavesurfer>
+
+                                                            </ng-container>
+                                                            <ng-template #noFile>
+                                                                <span class="text-muted">لا يوجد ملف</span>
+                                                            </ng-template>
+                                                        </td>
+
+                                                        <!-- الإجراءات -->
+                                                        <td class="text-center">
+                                                            <div class="d-flex justify-content-center gap-2">
+                                                                <button class="btn btn-sm btn-outline-primary"
+                                                                    type="button" title="تعديل"
+                                                                    (click)="$event.stopPropagation(); onEditEffect(se)">
+                                                                    <i class="ri-edit-2-line"></i>
+                                                                </button>
+
+                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                    type="button" title="حذف"
+                                                                    (click)="$event.stopPropagation(); onDeleteEffect(se)">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr *ngIf="pagedEffects.length === 0">
+                                                        <td colspan="4" class="text-center text-muted py-4 is-clickable"
+                                                            role="button" tabindex="0"
+                                                            [attr.aria-disabled]="!canCreateEffects ? 'true' : null"
+                                                            (click)="canCreateEffects && onAddEffect()"
+                                                            (keyup.enter)="canCreateEffects && onAddEffect()"
+                                                            [title]="canCreateEffects ? 'إضافة مؤثر جديد' : 'لا تملك صلاحية الإضافة'">
+                                                            <span class="empty-cats-text">لا توجد مؤثرات ضمن هذه
+                                                                الفئة</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div *ngIf="filteredEffects.length > 5">
+                                            <app-paginator [length]="filteredEffects.length" [pageSize]="pageSize"
+                                                [pageIndex]="pageIndex" (pageChange)="onPageChange($event)">
+                                            </app-paginator>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fallback when no SOUND_EFFECTS_READ permission -->
+                                    <ng-template #noEffectsRead>
+                                        <div class="p-3 preview d-flex justify-content-center">
+                                            <span class="text-muted empty-tweets-text">لا تملك صلاحية عرض المؤثرات
+                                                الصوتية</span>
+                                        </div>
+                                    </ng-template>
+                                </mat-tab>
+
+                                <ng-template #noEffectsRead>
+                                    <div class="p-3 preview d-flex justify-content-center">
+                                        <span class="text-muted empty-tweets-text">لا تملك صلاحية عرض المؤثرات
+                                            الصوتية</span>
+                                    </div>
+                                </ng-template>
+                            </mat-tab-group>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

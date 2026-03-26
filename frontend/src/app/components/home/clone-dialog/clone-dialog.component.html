@@ -1,0 +1,295 @@
+<div class="card-dialog" dir="rtl">
+    <div class="card w-100">
+        <!-- Header -->
+        <div class="card-header d-flex align-items-center gap-2">
+            <h3 class="card-title mb-0">{{ headerTitle }}</h3>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <div class="scrollable-stepper">
+                <form [formGroup]="formGroup">
+                    <mat-horizontal-stepper (selectionChange)="onStepChange($event)" linear #stepper>
+
+                        <!-- STEP 1: Target + scenario -->
+                        <mat-step [stepControl]="step1Group">
+                            <form [formGroup]="step1Group">
+                                <ng-template matStepLabel>اختيار الهدف</ng-template>
+
+                                <!-- Target select -->
+                                <div class="mb-3">
+                                    <label class="form-label label-rtl" for="targetSel">الهدف</label>
+                                    <select id="targetSel" class="form-select rtl-input" formControlName="targetId"
+                                        required>
+                                        <option [ngValue]="''" disabled>— اختر هدفًا —</option>
+                                        <ng-container *ngFor="let t of targets">
+                                            <option [ngValue]="t.id" [disabled]="!isTargetUsable(t)">
+                                                {{ t.name }}
+                                                <ng-container *ngIf="!isTargetUsable(t)"> — (لم يتم تدريب نموذجه
+                                                    بعد)</ng-container>
+                                            </option>
+                                        </ng-container>
+                                    </select>
+                                    <div class="form-text text-danger"
+                                        *ngIf="step1Group.get('targetId')?.touched && !selectedTarget()">
+                                        الرجاء اختيار هدف.
+                                    </div>
+                                </div>
+
+                                <!-- Scenario (optional) -->
+                                <div class="mb-3">
+                                    <label class="form-label label-rtl" for="scenario">السيناريو (اختياري)</label>
+                                    <textarea id="scenario" rows="3" class="form-control rtl-input"
+                                        placeholder="نص/سيناريو اختياري للمحتوى" formControlName="scenario"
+                                        autocomplete="off" autocorrect="off" autocapitalize="off"
+                                        spellcheck="false"></textarea>
+                                </div>
+                            </form>
+                        </mat-step>
+
+                        <!-- STEP 2: Content audio + ref + optional sound effect -->
+                        <mat-step [stepControl]="step2Group">
+                            <form [formGroup]="step2Group">
+                                <ng-template matStepLabel>الملفات</ng-template>
+
+                                <!-- Content audio (upload one) -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label label-rtl mb-0">مقطع صوتي لمحتوى النسخ</label>
+                                        <!-- <small class="text-muted fst-italic">تحميل مقطع صوتي واحد</small> -->
+                                        <small class="text-muted fst-italic">
+                                            محتوى المادة المراد قولها بصوت الهدف
+                                        </small>
+                                    </div>
+
+                                    <ng-container *ngIf="!previewContent || !contentFileId; else contentPreview">
+                                        <app-dropfile [isTitle]="false" [maxFiles]="1" acceptedTypes="audio/*, video/*"
+                                            (filesUploaded)="onContentUploaded($event)">
+                                        </app-dropfile>
+                                    </ng-container>
+
+                                    <ng-template #contentPreview>
+                                        <div class="preview-surface mb-2">
+                                            <app-wavesurfer [fileId]="contentFileId!" [autoLoad]="true"
+                                                [enhanced]="false" [showRegionOverlay]="false"
+                                                [showRegionRemove]="false">
+                                            </app-wavesurfer>
+                                            <div class="d-flex justify-content-end mt-2 gap-2">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                    (click)="previewContent = false">إخفاء المعاينة</button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    (click)="onDeleteContent()" title="حذف الملف">حذف</button>
+                                            </div>
+                                        </div>
+                                    </ng-template>
+                                </div>
+
+                                <!-- Reference from target -->
+                                <div class="mb-3">
+                                    <label class="form-label label-rtl" for="refSel">الصوت المرجعي</label>
+
+                                    <!-- If more than one reference -> show select -->
+                                    <ng-container *ngIf="refChoices.length > 1; else singleRefView">
+                                        <select id="refSel" class="form-select rtl-input"
+                                            formControlName="referenceAudioId" required>
+                                            <option [ngValue]="''" disabled>— اختر صوتًا مرجعيًا —</option>
+                                            <option *ngFor="let r of refChoices" [ngValue]="r.id">
+                                                {{ r.filename || r.id }}
+                                            </option>
+                                        </select>
+                                    </ng-container>
+
+                                    <!-- If exactly one reference -> show a non-dropdown chip -->
+                                    <ng-template #singleRefView>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="chip">{{ (refChoices[0]?.filename || refChoices[0]?.id) |
+                                                slice:0:40 }}</span>
+                                            <!-- keep control value for form validity (hidden, but bound) -->
+                                            <input type="hidden" [value]="refChoices[0]?.id"
+                                                formControlName="referenceAudioId" />
+                                        </div>
+                                    </ng-template>
+
+                                    <div class="form-text text-muted" *ngIf="!refChoices.length">
+                                        اختر هدفًا لعرض ملفاته المرجعية.
+                                    </div>
+                                </div>
+
+                                <!-- Optional sound effect -->
+                                <div class="row g-2">
+
+                                    <!-- If no sound-effect types at all -->
+                                    <ng-container *ngIf="seTypes.length === 0; else hasTypes">
+                                        <div class="col-12">
+                                            <label class="form-label label-rtl">المؤثر الصوتي</label>
+                                            <div class="alert alert-info py-2 mb-0 text-center">
+                                                ﻻ يوجد مؤثرات صوتية للاختيار منها.
+                                            </div>
+                                        </div>
+                                    </ng-container>
+
+                                    <!-- If we have types, show selects -->
+                                    <ng-template #hasTypes>
+                                        <div class="col-md-6">
+                                            <label class="form-label label-rtl" for="seTypeSel">فئة المؤثر
+                                                (اختياري)</label>
+                                            <select id="seTypeSel" class="form-select rtl-input"
+                                                formControlName="soundEffectTypeId">
+                                                <option [ngValue]="''">— جميع الفئات —</option>
+                                                <option *ngFor="let t of seTypes" [ngValue]="t.id">
+                                                    {{ t.soundEffectType }}
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Sound effect list (hidden if no effects for selected type) -->
+                                        <div class="col-md-6" *ngIf="effects.length > 0">
+                                            <label class="form-label label-rtl" for="seSel">المؤثر الصوتي
+                                                (اختياري)</label>
+                                            <select id="seSel" class="form-select rtl-input"
+                                                formControlName="soundEffectId">
+                                                <option [ngValue]="''">— بدون مؤثر —</option>
+                                                <option *ngFor="let e of effects" [ngValue]="e.id">
+                                                    {{ e.name }}
+                                                    <ng-container *ngIf="e.start != null && e.end != null">
+                                                        — (من {{ formatTimestamp(e.start) }} إلى {{ formatTimestamp(e.end) }})
+                                                    </ng-container>
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <!-- If type selected but that type has no items -->
+                                        <div class="col-md-6"
+                                            *ngIf="effects.length === 0 && step2Group.value.soundEffectTypeId">
+                                            <label class="form-label label-rtl">المؤثر الصوتي</label>
+                                            <div class="alert alert-warning py-2 mb-0 text-center">
+                                                لا يوجد مؤثرات صوتية في هذه الفئة.
+                                            </div>
+                                        </div>
+                                    </ng-template>
+
+                                </div>
+
+                                <!-- Selected SFX preview -->
+                                <div class="row g-2 mt-2" *ngIf="selectedSfxFileId">
+                                    <div class="col-12">
+                                        <label class="form-label label-rtl mb-1">معاينة المؤثر الصوتي</label>
+                                        <div class="preview-surface">
+                                            <app-wavesurfer [fileId]="selectedSfxFileId" [autoLoad]="true"
+                                                [enhanced]="false" [showRegionOverlay]="true"
+                                                [initialRegion]="selectedSfxRegion" [showRegionRemove]="false">
+                                            </app-wavesurfer>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </mat-step>
+
+                        <!-- STEP 3: Sliders -->
+                        <mat-step [stepControl]="step3Group">
+                            <form [formGroup]="step3Group">
+                                <ng-template matStepLabel>إعدادات الاستنساخ</ng-template>
+                                <!-- Presets as Material chips -->
+
+                                <mat-chip-listbox class="preset-row" [multiple]="false" aria-label="الخيارات السريعة">
+                                    <mat-chip-option [selected]="selectedPreset==='fast'"
+                                        (click)="selectedPreset='fast'; applyPreset('fast')">
+                                        سريع
+                                    </mat-chip-option>
+
+                                    <mat-chip-option [selected]="selectedPreset==='balanced'"
+                                        (click)="selectedPreset='balanced'; applyPreset('balanced')">
+                                        متوازن
+                                    </mat-chip-option>
+
+                                    <mat-chip-option [selected]="selectedPreset==='quality'"
+                                        (click)="selectedPreset='quality'; applyPreset('quality')">
+                                        جودة عالية
+                                    </mat-chip-option>
+                                </mat-chip-listbox>
+
+
+                                <!-- Diffusion -->
+                                <div class="tuning-block">
+                                    <label
+                                        class="form-label label-rtl d-flex justify-content-between align-items-center">
+                                        <span>عدد الخطوات (Diffusion)</span>
+                                        <small class="text-muted d-block mt-1">العدد أكبر = الجودة أعلى ولكن
+                                            يأخذ وقتًا أطول</small>
+                                        <strong>{{ step3Group.value.diffusion }}</strong>
+                                    </label>
+
+                                    <div class="tuning-row">
+                                        <!-- Slider first (left) -->
+                                        <mat-slider class="slider" min="1" max="60" step="1" showTickMarks
+                                            [discrete]="true">
+                                            <input matSliderThumb formControlName="diffusion">
+                                        </mat-slider>
+                                    </div>
+
+                                </div>
+
+                                <!-- Length -->
+                                <div class="tuning-block">
+                                    <label
+                                        class="form-label label-rtl d-flex justify-content-between align-items-center">
+                                        <span>سرعة المقطع المستنسخ (Speed)</span>
+                                        <small class="text-muted d-block mt-1">أكبر من 1 (أسرع)، أصغر من 1
+                                            (أبطأ)</small>
+                                        <strong>{{ step3Group.value.length }}</strong>
+                                    </label>
+
+                                    <div class="tuning-row">
+                                        <mat-slider class="slider" min="0.5" max="2" step="0.05" showTickMarks
+                                            [discrete]="true">
+                                            <input matSliderThumb formControlName="length">
+                                        </mat-slider>
+                                    </div>
+
+                                </div>
+
+                                <!-- Inference rate -->
+                                <div class="tuning-block">
+                                    <label
+                                        class="form-label label-rtl d-flex justify-content-between align-items-center">
+                                        <span>قوة التقليد (Inference rate)</span>
+                                        <small class="text-muted d-block mt-1">العدد أكبر = تقليد أقوى لكن قد تظهر
+                                            شوائب</small>
+                                        <strong>{{ step3Group.value.inference_rate }}</strong>
+                                    </label>
+
+                                    <div class="tuning-row">
+                                        <mat-slider class="slider" min="0" max="1" step="0.01" showTickMarks
+                                            [discrete]="true">
+                                            <input matSliderThumb formControlName="inference_rate">
+                                        </mat-slider>
+                                    </div>
+
+                                </div>
+
+                            </form>
+                        </mat-step>
+
+
+
+                    </mat-horizontal-stepper>
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer d-flex justify-content-between gap-2">
+            <button class="btn btn-outline-secondary" type="button" *ngIf="stepIndex > 0"
+                (click)="goPrev()">السابق</button>
+
+            <div class="ms-auto d-flex gap-2">
+                <button *ngIf="stepIndex < 2" class="btn btn-primary" type="button" (click)="goNext()"
+                    [disabled]="isNextDisabled()">التالي</button>
+                <button *ngIf="stepIndex === 2" class="btn btn-success" type="button"
+                    (click)="onConfirm()">تأكيد</button>
+                <button class="btn btn-outline-danger" type="button" (click)="onCancel()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+</div>

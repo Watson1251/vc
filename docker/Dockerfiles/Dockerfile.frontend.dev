@@ -1,0 +1,30 @@
+# --- Development Stage ---
+FROM node:18 AS dev
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Muscat
+
+# Install tzdata and set timezone
+RUN apt-get update && \
+    apt-get install -y tzdata gettext-base && \
+    ln -sf /usr/share/zoneinfo/Asia/Muscat /etc/localtime && \
+    echo "Asia/Muscat" > /etc/timezone && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /frontend
+
+# Copy source files
+COPY ./frontend ./
+
+# Install Angular CLI globally
+RUN npm install -g @angular/cli@16
+
+# Install dependencies
+COPY ./frontend/package*.json ./
+RUN npm install --legacy-peer-deps
+
+EXPOSE 4200
+
+# CMD sh -c 'envsubst < src/assets/env.template.js > src/assets/env.js && npm start'

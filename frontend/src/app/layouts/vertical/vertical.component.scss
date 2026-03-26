@@ -1,0 +1,71 @@
+:root {
+    --topbar-h: 64px;
+    /* adjust to your topbar */
+    --sidebar-w: 260px;
+    /* adjust to your sidebar */
+    --footer-h: 56px;
+    /* footer min height */
+}
+
+/* Whole page is a column; ensures footer sticks to bottom on short pages */
+.layout {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Below the topbar, we place sidebar + main next to each other */
+.layout-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    /* enables inner flex children to size correctly */
+    padding-top: var(--topbar-h);
+}
+
+/* Sidebar should NOT overlap content; if your sidebar is fixed, keep its width here */
+app-sidebar {
+    width: var(--sidebar-w);
+    flex: 0 0 var(--sidebar-w);
+    min-height: calc(100dvh - var(--topbar-h));
+    /* if the sidebar itself is position:fixed in its own styles, keep this block as width keeper */
+}
+
+/* Main column: a vertical flex container with footer at the end */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    /* prevents overflow from long content */
+    min-height: calc(100dvh - var(--topbar-h));
+    /* if your topbar is fixed/sticky, we already compensated above with padding-top on .layout-body */
+}
+
+/* Page content grows and scrolls; footer stays visible below it */
+.page-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Provide breathing room above footer so sticky elements never cover it */
+    padding-bottom: var(--footer-h);
+    /* let inner components create their own scrollers (e.g., .preview) */
+    overflow: visible;
+}
+
+/* Optional: if you had a global sticky thead, scope it within inner scrollers */
+.preview {
+    /* set this where your big tables live (as you already do) */
+    max-height: calc(100dvh - var(--topbar-h) - var(--footer-h) - 140px);
+    overflow: auto;
+    position: relative;
+    overscroll-behavior: contain;
+}
+
+.preview .table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #fff;
+}
+
+/* Right sidebar/overlays live above content; no change needed */

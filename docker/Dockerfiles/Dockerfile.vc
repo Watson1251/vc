@@ -1,0 +1,50 @@
+# Use the official Ubuntu 20.04 image with CUDA and cuDNN
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu20.04
+
+# Prevent interactive prompts during package installs
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Python 3.10 and other dependencies
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y \
+    python3.9 \
+    python3.9-venv \
+    python3-pip \
+    build-essential \
+    curl \
+    wget \
+    git \
+    lsb-release \
+    gnupg2 \
+    libgl1-mesa-glx \
+    ffmpeg \
+    sox \
+    libsndfile1 \
+    iproute2 \
+    cmake && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Symlink python3.9 and pip3.9 to default
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1 && \
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+
+# Copy the application
+COPY engines/vc /vc
+WORKDIR /vc
+
+# Copy shared utils into backend/utils
+COPY utils/logger /logger
+
+# Install Python packages via your script
+RUN pip install --upgrade pip && \
+    bash /vc/env/install.sh
+
+# Expose the app port
+EXPOSE 8000
+
+# Default shell
+CMD ["/bin/bash"]

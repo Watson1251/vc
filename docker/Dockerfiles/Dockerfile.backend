@@ -1,0 +1,33 @@
+# --- Builder Stage ---
+FROM node:18-slim
+
+# Install tzdata and set timezone
+RUN apt-get update && \
+    apt-get install -y tzdata && \
+    ln -sf /usr/share/zoneinfo/Asia/Muscat /etc/localtime && \
+    echo "Asia/Muscat" > /etc/timezone && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set timezone environment variable
+ENV TZ=Asia/Muscat
+
+WORKDIR /backend
+
+# Copy only package files first for caching
+COPY ./backend/package*.json ./
+RUN npm install
+RUN npm install -g pm2 nodemon
+
+# Copy backend source
+COPY ./backend ./
+
+# Copy shared utils into backend/utils
+COPY ./utils/logger /logger
+
+EXPOSE 3000
+
+ENV SERVICE_NAME=backend
+
+CMD ["/bin/bash"]

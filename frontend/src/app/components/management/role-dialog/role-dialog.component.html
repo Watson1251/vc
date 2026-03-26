@@ -1,0 +1,77 @@
+<!-- Title bar -->
+<div class="rd-header">
+    <h2 class="rd-title">{{ title }}</h2>
+    <button class="rd-close" type="button" aria-label="Close" (click)="onCancel()">
+        <i class="ri-close-line"></i>
+    </button>
+</div>
+
+<!-- Scrollable content -->
+<div class="rd-content">
+    <form [formGroup]="form" (ngSubmit)="onSave()" class="rd-form">
+
+        <!-- Role name -->
+        <div class="rd-field">
+            <label class="rd-label">اسم الدور</label>
+            <input type="text" class="form-control rd-input" formControlName="name"
+                placeholder="مثال: admin / viewer" />
+            <div class="rd-error" *ngIf="form.controls.name.touched && form.controls.name.errors as e">
+                <ng-container *ngIf="e['required']">الاسم مطلوب.</ng-container>
+                <ng-container *ngIf="e['maxlength']">الحد الأقصى لطول الاسم هو 64 حرفًا.</ng-container>
+                <ng-container *ngIf="e['roleNameTaken']">اسم الدور مستخدم بالفعل، اختر اسمًا آخر.</ng-container>
+            </div>
+        </div>
+
+        <!-- Permissions -->
+        <div class="rd-field">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <label class="rd-label mb-0">الصلاحيات</label>
+                <span *ngIf="data.role?.isAdmin" class="badge bg-warning-subtle text-warning-emphasis rd-admin-badge">
+                    مدير — جميع الصلاحيات مفعّلة
+                </span>
+            </div>
+
+            <!-- search -->
+            <div class="input-group mb-2 flex-row-reverse">
+                <span class="input-group-text"><i class="ri-search-line"></i></span>
+                <input type="text" class="form-control rtl-input" placeholder="ابحث ضمن الصلاحيات…"
+                    [formControl]="permSearch" style="min-width:0;" />
+            </div>
+
+            <!-- ONE box, multiple rows -->
+            <div class="perm-box">
+                <div class="perm-row" *ngFor="let g of groups; trackBy: trackGroup">
+                    <!-- Group header with toggle -->
+                    <div class="perm-row-header d-flex align-items-center mb-1">
+                        <button type="button" class="btn btn-sm perm-toggle" (click)="toggleGroup(g)"
+                            [disabled]="isDisabled()" [title]="groupAllSelected(g) ? 'إلغاء التحديد' : 'تحديد الكل'">
+                            <i class="ri-checkbox-multiple-line" [class.text-primary]="groupAnySelected(g)"></i>
+                            <span class="count">{{ groupSelectedCount(g) }}/{{ groupCount(g) }}</span>
+                        </button>
+                        <div class="perm-row-title ms-2">{{ g.title }}</div>
+                    </div>
+
+                    <!-- chips -->
+                    <div class="perm-row-chips">
+                        <button type="button" class="rd-chip" *ngFor="let p of g.items; trackBy: trackPerm"
+                            [class.is-selected]="isSelected(p.hash) || isEnforcedRead(p)" [disabled]="isDisabled()"
+                            (click)="toggle(p.hash)" [title]="p.key">
+                            {{ p.label }}
+                        </button>
+                    </div>
+                </div>
+
+                <div *ngIf="groups.length === 0" class="text-muted small text-center py-2">
+                    لا توجد صلاحيات مطابقة لبحثك
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="rd-actions">
+            <button type="button" class="btn btn-light" (click)="onCancel()">إلغاء</button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">حفظ</button>
+        </div>
+    </form>
+</div>

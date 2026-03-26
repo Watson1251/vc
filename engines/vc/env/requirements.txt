@@ -1,0 +1,32 @@
+# ---- Core ML / Audio (Torch installed in install.sh) ----
+accelerate
+scipy
+librosa
+huggingface-hub
+munch
+einops
+descript-audio-codec
+gradio
+pydub
+resemblyzer
+jiwer
+transformers
+FreeSimpleGUI
+soundfile
+sounddevice
+modelscope
+funasr
+numpy
+hydra-core
+pyyaml
+python-dotenv
+cryptography
+
+# ---- Web / Serving / Utils ----
+flask
+gunicorn
+uvicorn
+python-multipart
+demucs
+requests
+pika

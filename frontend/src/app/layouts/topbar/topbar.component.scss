@@ -1,0 +1,40 @@
+.user-dropdown-toggle {
+    cursor: pointer;
+    font-family: var(--arabic-font);
+    font-size: 16px;
+    color: #333;
+
+    i {
+        font-size: 18px;
+    }
+}
+
+.dropdown-item {
+    font-family: var(--arabic-font);
+    font-size: 16px;
+    color: #333;
+    padding: 10px 20px;
+
+    &:hover {
+        background-color: #f0f0f0;
+    }
+}
+
+/* Or simpler: only target spans that don't have .button-focus themselves */
+span:not(.button-focus) {
+    font-family: var(--arabic-font);
+}
+
+/* Focused state overrides */
+.button-focus {
+    color: #1c1586 !important;
+    background-color: white;
+}
+
+mat-icon {
+    transform: scale(1.5);
+}
+
+.button-col {
+    padding: 20px;
+}

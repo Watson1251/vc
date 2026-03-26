@@ -1,0 +1,59 @@
+<section class="auth-page-wrapper py-5 d-flex align-items-center justify-content-center min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-sm-5 m-lg-4">
+                        <form (ngSubmit)="onLogin(loginForm)" #loginForm="ngForm" autocomplete="off" novalidate>
+                            <div class="text-center mb-4">
+                                <h1 class="title">تسجيل الدخول</h1>
+                            </div>
+
+                            <!-- Username -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label">
+                                    اسم المستخدم <span class="text-danger">*</span>
+                                </label>
+                                <input ngModel name="username" id="username" type="text" class="form-control with-icon"
+                                    placeholder="اكتب اسم المستخدم" #usernameInput="ngModel" required autocomplete="off"
+                                    autocapitalize="off" spellcheck="false" />
+                                <div class="text-danger mt-1" *ngIf="usernameInput.invalid && loginForm.submitted">
+                                    يرجى إدخال اسم المستخدم
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="password-input" class="form-label">
+                                    كلمة المرور <span class="text-danger">*</span>
+                                </label>
+                                <div class="position-relative">
+                                    <input ngModel name="password" id="password-input"
+                                        [type]="fieldTextType ? 'text' : 'password'" class="form-control with-icon"
+                                        placeholder="اكتب كلمة المرور" #passwordInput="ngModel" required
+                                        autocomplete="new-password" />
+                                    <button type="button" class="password-toggle" (click)="toggleFieldTextType()"
+                                        tabindex="-1">
+                                        <i class="ri-eye-fill" *ngIf="!fieldTextType"></i>
+                                        <i class="ri-eye-off-fill" *ngIf="fieldTextType"></i>
+                                    </button>
+                                </div>
+                                <div class="text-danger mt-1" *ngIf="passwordInput.invalid && loginForm.submitted">
+                                    يرجى إدخال كلمة المرور
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="mt-4">
+                                <button class="btn btn-primary w-100 submit-button" type="submit"
+                                    [disabled]="loginForm.invalid || isLoading">
+                                    {{ isLoading ? 'جاري الدخول...' : 'الدخول' }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

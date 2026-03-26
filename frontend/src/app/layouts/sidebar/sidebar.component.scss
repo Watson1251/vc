@@ -1,0 +1,46 @@
+.active {
+  /* Add your desired styles for the active link */
+  color: blue;
+  font-weight: bold;
+}
+
+span {
+  font-family: var(--arabic-font) !important;
+}
+
+/* Keep the big logo row tidy */
+.logo .logo-lg .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  /* space between icon and text */
+  // height: 22px;
+  /* match the image height */
+}
+
+/* Ensure the icon is exactly 22px tall */
+.logo .logo-lg .brand .brand-mark {
+  height: 40px;
+}
+
+/* Make the text align visually with the icon */
+.logo .logo-lg .brand .brand-text {
+  font-weight: 700;
+  line-height: 80px;
+  /* matches icon height */
+  white-space: nowrap;
+  font-size: 18px;
+  // /* tweak as needed */
+  letter-spacing: .2px;
+}
+
+/* Theme-aware text color */
+.logo.logo-dark .brand-text {
+  color: var(--logo-dark-text, #0f172a);
+  /* dark theme text */
+}
+
+.logo.logo-light .brand-text {
+  color: var(--logo-light-text, #fff);
+  /* light theme text */
+}

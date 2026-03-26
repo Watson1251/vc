@@ -1,0 +1,53 @@
+<div class="card-dialog" dir="rtl">
+    <div class="card w-100">
+        <!-- Card Header -->
+        <div class="card-header d-flex align-items-center gap-2">
+            <h1 class="card-title mb-0">{{ title }}</h1>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+            <!-- DELETE MODE -->
+            <div *ngIf="mode === 'delete'; else formBlock" class="delete-block">
+                <p class="dlg-text mb-3">
+                    {{ message }}
+                </p>
+            </div>
+
+            <!-- CREATE / EDIT MODE -->
+            <ng-template #formBlock>
+                <form [formGroup]="form" (ngSubmit)="onConfirm()" class="dlg-form">
+                    <div class="mb-3">
+                        <label class="form-label label-rtl" for="categoryName">اسم الفئة</label>
+                        <input id="categoryName" type="text" class="form-control rtl-input"
+                            placeholder="اكتب اسم الفئة..." formControlName="name"
+                            [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched" autofocus
+                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+
+                        <div class="invalid-feedback" *ngIf="form.get('name')?.hasError('minlength')">
+                            الاسم يجب أن يكون على الأقل 3 أحرف
+                        </div>
+                        <div class="invalid-feedback" *ngIf="form.get('name')?.hasError('whitespace')">
+                            الرجاء إدخال اسم صحيح
+                        </div>
+                        <div class="invalid-feedback d-block text-end" *ngIf="form.get('name')?.hasError('duplicate')">
+                            الاسم مستخدم لديك من قبل
+                        </div>
+                    </div>
+
+                    <!-- Hidden submit for Enter key -->
+                    <button type="submit" class="d-none" aria-hidden="true"></button>
+                </form>
+            </ng-template>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <button mat-button type="button" (click)="onCancel()">إلغاء</button>
+            <button mat-flat-button type="button" [color]="mode === 'delete' ? 'warn' : 'primary'"
+                [disabled]="!canSubmit" (click)="onConfirm()">
+                {{ actionLabel }}
+            </button>
+        </div>
+    </div>
+</div>

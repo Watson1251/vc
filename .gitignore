@@ -1,0 +1,87 @@
+# --- Secrets & local configuration ---
+.env
+.env.*
+!.env.example
+backend/.env
+security/certs/*
+!security/certs/.gitkeep
+
+# --- Database & runtime data (bind mounts / local state) ---
+db/logs/
+db/media/
+db/mongo/
+db/rabbitmq/
+db/ollama/
+db/androidkeys/
+db/tweet_media/
+
+# --- Dependencies & build output ---
+**/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/tmp/
+frontend/out-tsc/
+backend/uploads/
+backend/angular/
+
+# --- Docker local artifacts ---
+docker/images/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+
+# --- ML models, weights & caches ---
+engines/nemo-engine/models/
+engines/vc/src/seed-vc/checkpoints/
+engines/vc/src/seed-vc/runs/
+engines/vc/src/seed-vc/garbages/
+engines/vc/src/seed-vc/flagged/
+engines/vc/src/seed-vc/experimental/
+engines/vc/src/seed-vc/build/
+engines/vc/src/seed-vc/dist/
+engines/vc/src/seed-vc/cache/
+engines/vc/src/seed-vc/*.pth
+engines/vc/src/seed-vc/**/*.pth
+engines/vc/src/seed-vc/campplus_cn_common.bin
+engines/vc/src/seed-vc/baselines/**/*.onnx
+engines/vc/src/seed-vc/modules/openvoice/checkpoints_v2/
+engines/vc/src/seed-vc/configs/inuse/
+
+# --- Large tutorial media (use Git LFS or host separately if needed) ---
+frontend/src/assets/help/*.mp4
+
+# --- Packaged toolchain binaries (reinstall via security/cert_gen scripts) ---
+security/cert_gen/mkcert-linux
+security/cert_gen/mkcert.exe
+
+# --- IDE & OS ---
+.idea/
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

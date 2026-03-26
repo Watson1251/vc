@@ -1,0 +1,205 @@
+<div class="d-flex flex-column gap-3 fluid-container">
+    <!-- EMPTY STATE -->
+    <h1 *ngIf="!permissions.length && !roles.length && !users.length" class="no-items-text">
+        لا يوجد عناصر في هذه الصفحة
+    </h1>
+
+    <!-- ===== ROLES CARD ===== -->
+    <div *appHasPerm="'ROLES_READ'" class="card w-100">
+        <!-- header -->
+        <div class="card-header d-flex align-items-center gap-2">
+            <h3 class="card-title">إدارة الأدوار والصلاحيات</h3>
+        </div>
+
+        <!-- body -->
+        <div class="card-body">
+            <!-- Toolbar -->
+            <div class="d-flex align-items-stretch mb-3 w-100 gap-2">
+                <div class="input-group flex-grow-1 flex-row-reverse">
+                    <span class="input-group-text"><i class="ri-search-line"></i></span>
+                    <input type="text" class="form-control rtl-input" placeholder="ابحث عن دور..."
+                        [(ngModel)]="searchTerm" (input)="applyFilter()" style="min-width:0;" />
+                </div>
+
+                <button *appHasPerm="'ROLES_CREATE'"
+                    class="btn btn-success d-flex align-items-center justify-content-center h-100 px-3"
+                    style="white-space: nowrap; width: 150px;" (click)="openCreateRole()">
+                    <i class="ri-add-line ms-1"></i> دور جديد
+                </button>
+
+                <button class="btn btn-outline-warning d-flex align-items-center justify-content-center h-100 px-3"
+                    style="white-space: nowrap;" (click)="refreshRoles()">
+                    <i class="ri-refresh-line ms-1"></i> تحديث
+                </button>
+            </div>
+
+            <!-- Roles table -->
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center align-middle" style="width:6%">ت</th>
+                            <th class="text-center align-middle" style="width:24%">الدور</th>
+                            <th class="text-center align-middle" style="width:50%">الصلاحيات</th>
+                            <th *appHasPerm="['ROLES_UPDATE','ROLES_DELETE']; mode: 'any'"
+                                class="text-center align-middle" style="width:20%">
+                                الإجراءات
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let role of pagedRoles; index as i" (click)="selectRole(role)">
+                            <td class="text-center">{{ pageIndex * pageSize + i + 1 }}</td>
+
+                            <td class="text-center">
+                                {{ role.name }}
+                                <span *ngIf="role.isAdmin" class="ms-1" title="مدير">
+                                    <i class="ri-vip-crown-line text-warning"></i>
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                <div class="perm-inline">
+                                    <!-- rows of 3 groups -->
+                                    <ng-container *ngFor="let row of chunk(roleGroupSummaries(role), 3)">
+                                        <div class="perm-row">
+                                            <span class="gwrap" *ngFor="let g of row; trackBy: trackMiniGroup">
+                                                <!-- title chip -->
+                                                <span class="badge rounded-pill bg-light text-dark border gchip">
+                                                    {{ g.title }} · {{ g.items.length }}
+                                                </span>
+
+                                                <!-- hover list -->
+                                                <span class="glist">
+                                                    <span *ngFor="let p of g.items; trackBy: trackPermMini"
+                                                        class="badge rounded-pill list-chip">
+                                                        {{ p.label || p.key || 'غير معروف' }}
+                                                    </span>
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </ng-container>
+
+                                    <span *ngIf="!role.permissionHashes?.length" class="text-muted small">
+                                        لا توجد صلاحيات
+                                    </span>
+                                </div>
+                            </td>
+
+
+                            <td *appHasPerm="['ROLES_UPDATE','ROLES_DELETE']; mode: 'any'" class="text-center">
+                                <button *appHasPerm="'ROLES_UPDATE'" class="btn btn-sm btn-primary ms-2"
+                                    (click)="onEditRole(role); $event.stopPropagation()">
+                                    <i class="ri-edit-2-line"></i> تعديل
+                                </button>
+
+                                <button [disabled]="role.isAdmin" *appHasPerm="'ROLES_DELETE'"
+                                    class="btn btn-sm btn-danger"
+                                    (click)="onDeleteRole(role); $event.stopPropagation()">
+                                    <i class="ri-delete-bin-line"></i> حذف
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="filteredRoles.length > pageSize">
+                    <app-paginator [dataSource]="dataSource" [length]="filteredRoles.length" [pageSize]="pageSize"
+                        [pageIndex]="pageIndex" (pageChange)="onPageChange($event)">
+                    </app-paginator>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== USERS CARD ===== -->
+    <div *appHasPerm="'USERS_READ'" class="card w-100">
+        <!-- header -->
+        <div class="card-header d-flex align-items-center gap-2">
+            <h3 class="card-title">إدارة المستخدمين</h3>
+        </div>
+
+        <!-- body -->
+        <div class="card-body">
+            <!-- Toolbar -->
+            <div class="d-flex align-items-stretch mb-3 w-100 gap-2">
+                <div class="input-group flex-grow-1 flex-row-reverse">
+                    <span class="input-group-text"><i class="ri-search-line"></i></span>
+                    <input type="text" class="form-control rtl-input" placeholder="ابحث عن مستخدم..."
+                        [(ngModel)]="userSearch" (input)="applyUserFilter()" style="min-width:0;" />
+                </div>
+
+                <button *appHasPerm="'USERS_CREATE'"
+                    class="btn btn-success d-flex align-items-center justify-content-center h-100 px-3"
+                    style="white-space: nowrap; width: 150px;" (click)="openCreateUser()">
+                    <i class="ri-add-line ms-1"></i> مستخدم جديد
+                </button>
+
+                <button class="btn btn-outline-warning d-flex align-items-center justify-content-center h-100 px-3"
+                    style="white-space: nowrap;" (click)="refreshUsers()">
+                    <i class="ri-refresh-line ms-1"></i> تحديث
+                </button>
+            </div>
+
+            <!-- Users table -->
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center align-middle" style="width:6%">ت</th>
+                            <th class="text-center align-middle">الاسم</th>
+                            <th class="text-center align-middle">اسم المستخدم</th>
+                            <th class="text-center align-middle">الدور</th>
+                            <th *appHasPerm="['USERS_UPDATE','USERS_DELETE']; mode: 'any'"
+                                class="text-center align-middle" style="width:20%">
+                                الإجراءات
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let u of pagedUsers; index as i">
+                            <td class="text-center">{{ userPageIndex * userPageSize + i + 1 }}</td>
+                            <td class="text-center">{{ u.name || '' }}</td>
+                            <td class="text-center">{{ u.username || u.name }}</td>
+
+                            <!-- roles as chips -->
+                            <td class="text-center">
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <span *ngFor="let rn of getUserRoleNames(u)"
+                                        class="badge rounded-pill bg-light text-dark border">
+                                        {{ rn }}
+                                    </span>
+                                    <span *ngIf="getUserRoleNames(u).length === 0" class="text-muted small">
+                                        لا توجد أدوار
+                                    </span>
+                                </div>
+                            </td>
+
+
+                            <td *appHasPerm="['USERS_UPDATE','USERS_DELETE']; mode: 'any'" class="text-center">
+                                <button *appHasPerm="'USERS_UPDATE'" class="btn btn-sm btn-primary ms-2"
+                                    (click)="onEditUser(u)">
+                                    <i class="ri-edit-2-line"></i> تعديل
+                                </button>
+
+                                <button [disabled]="isUserAdmin(u) || isCurrentUserBySnapshot(u)"
+                                    *appHasPerm="'USERS_DELETE'" class="btn btn-sm btn-danger"
+                                    (click)="onDeleteUser(u)">
+                                    <i class="ri-delete-bin-line"></i> حذف
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="filteredUsers.length > userPageSize">
+                    <app-paginator [dataSource]="dataSourceUsers" [length]="filteredUsers.length"
+                        [pageSize]="userPageSize" [pageIndex]="userPageIndex" (pageChange)="onUserPageChange($event)">
+                    </app-paginator>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

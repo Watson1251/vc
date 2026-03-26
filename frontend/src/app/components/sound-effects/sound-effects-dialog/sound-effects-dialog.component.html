@@ -1,0 +1,111 @@
+<!-- sound-effects-dialog.component.html -->
+<div class="card-dialog" dir="rtl">
+    <div class="card w-100">
+        <!-- Header -->
+        <div class="card-header d-flex align-items-center gap-2">
+            <h3 class="card-title mb-0">{{ headerTitle }}</h3>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <!-- DELETE MODE: confirmation only -->
+            <ng-container *ngIf="mode === 'delete'; else editCreateBody">
+                <p class="mb-3">هل أنت متأكد من حذف هذا المؤثر الصوتي؟ هذا الإجراء لا يمكن التراجع عنه.</p>
+
+                <div class="border rounded p-3 bg-light mb-3">
+                    <div class="mb-1">
+                        <strong>وصف المؤثر:</strong>
+                        <span class="ms-1">{{ data.initial?.name || 'غير متوفر' }}</span>
+                    </div>
+
+                    <div>
+                        <strong>اسم الملف:</strong>
+                        <span class="ms-1" *ngIf="!isDeleteMetaLoading" dir="ltr">
+                            {{ deleteFileName || data.initial?.file?.filename || 'غير متوفر' }}
+                        </span>
+                        <span *ngIf="isDeleteMetaLoading" class="text-muted">جارِ التحميل...</span>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- CREATE / EDIT -->
+            <ng-template #editCreateBody>
+                <form [formGroup]="form" (ngSubmit)="onConfirm()" (keydown.enter)="$event.preventDefault()">
+                    <!-- Category select -->
+                    <div class="mb-3">
+                        <label class="form-label label-rtl" for="typeSel">فئة المؤثر</label>
+                        <select id="typeSel" class="form-select rtl-input" formControlName="soundEffectTypeId"
+                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <option *ngFor="let t of types" [value]="t.id">{{ t.soundEffectType }}</option>
+                        </select>
+                        <div class="invalid-feedback d-block"
+                            *ngIf="form.get('soundEffectTypeId')?.invalid && form.get('soundEffectTypeId')?.touched">
+                            يجب اختيار فئة
+                        </div>
+                    </div>
+
+                    <!-- Name / Description -->
+                    <div class="mb-3">
+                        <label class="form-label label-rtl" for="nameInp">وصف المؤثر</label>
+                        <input id="nameInp" type="text" class="form-control rtl-input"
+                            placeholder="اكتب وصفًا للمؤثر..." formControlName="name"
+                            [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                        <div class="invalid-feedback" *ngIf="form.get('name')?.hasError('minlength')">
+                            الاسم يجب أن يكون على الأقل 3 أحرف
+                        </div>
+                        <div class="invalid-feedback" *ngIf="form.get('name')?.hasError('whitespace')">
+                            الرجاء إدخال اسم صحيح
+                        </div>
+                    </div>
+
+                    <!-- Dropzone (show when there is no file yet) -->
+                    <div class="mb-2" *ngIf="!uploadedFileId && !originalFileId">
+                        <label class="form-label label-rtl">إرفاق الملف</label>
+                        <app-dropfile [isTitle]="false" [maxFiles]="1" acceptedTypes="audio/*, video/*"
+                            (filesUploaded)="onFilesUploaded($event)">
+                        </app-dropfile>
+                    </div>
+
+                    <!-- File Preview -->
+                    <div class="mb-3" *ngIf="uploadedFileId || originalFileId">
+                        <!-- Header Row -->
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="form-label label-rtl mb-0">معاينة الملف</label>
+
+                            <!-- Action Icons -->
+                            <div class="d-flex gap-2">
+                                <!-- Edit region -->
+                                <button mat-icon-button type="button" color="primary" aria-label="تعديل"
+                                    (click)="$event.preventDefault(); $event.stopPropagation(); onEditRegion()"
+                                    [disabled]="regionExists">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+
+                                <!-- Delete file -->
+                                <button mat-icon-button type="button" color="warn" aria-label="حذف"
+                                    (click)="$event.preventDefault(); $event.stopPropagation(); onDeleteFile()">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- WaveSurfer Component -->
+                        <app-wavesurfer [fileId]="uploadedFileId || originalFileId!" [autoLoad]="true"
+                            [initialRegion]="{ start: cropStart ?? undefined, end: cropEnd ?? undefined }"
+                            (regionState)="onRegionState($event)" (regionChange)="onRegionChange($event)">
+                        </app-wavesurfer>
+                    </div>
+                </form>
+            </ng-template>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <button mat-button type="button" (click)="onCancel()">إلغاء</button>
+            <button mat-flat-button type="button" color="primary" [disabled]="!canSave" (click)="onConfirm()">
+                {{ mode === 'delete' ? 'تأكيد الحذف' : 'حفظ' }}
+            </button>
+        </div>
+    </div>
+</div>

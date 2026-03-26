@@ -1,0 +1,116 @@
+/* Root */
+:host {
+    direction: rtl;
+    font-family: var(--arabic-font);
+    display: block;
+}
+
+/* Remove Material's default padding so the card can be edge-to-edge */
+::ng-deep .mat-mdc-dialog-container.card-dialog-panel .mdc-dialog__surface {
+    padding: 0 !important;
+    border-radius: 12px;
+}
+
+/* In case Material injects a content wrapper anywhere */
+::ng-deep .mat-mdc-dialog-container.card-dialog-panel .mdc-dialog__content,
+::ng-deep .mat-mdc-dialog-container.card-dialog-panel .mat-mdc-dialog-content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ensure our own wrapper/card don’t add accidental margins */
+.card-dialog {
+    margin: 0 !important;
+}
+
+.card {
+    margin: 0 !important;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-footer {
+    margin: 0 !important;
+}
+
+/* Optional: shadow similar to cards on pages (Material adds some by default) */
+::ng-deep .mat-mdc-dialog-container.card-dialog-panel {
+    border-radius: 12px;
+    font-family: var(--arabic-font);
+}
+
+/* Card shell inside the dialog */
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Title look to match your page */
+.card-title {
+    font-family: var(--arabic-font);
+    font-weight: bolder;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+/* Body text + RTL niceties */
+.card-body {
+    font-family: var(--arabic-font);
+    text-align: right;
+}
+
+/* Labels mimic your page form labels */
+.label-rtl {
+    display: inline-block;
+    margin-bottom: .35rem;
+    font-weight: bolder;
+    color: #6b7280;
+    /* gray-500-ish like your .label */
+    font-family: var(--arabic-font);
+}
+
+/* Inputs: same RTL behavior you already use */
+.rtl-input {
+    direction: rtl;
+    text-align: right !important;
+}
+
+.rtl-input::placeholder {
+    text-align: right;
+    opacity: .6;
+}
+
+/* Bootstrap invalid state harmonized with your colors */
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.invalid-feedback {
+    display: block;
+    text-align: right;
+    font-family: var(--arabic-font);
+}
+
+/* Delete mode text tone */
+.dlg-text {
+    color: rgba(54, 59, 57, .88);
+    font-weight: 600;
+}
+
+/* Footer actions: comfy spacing like your toolbar buttons */
+.card-footer {
+    background: #fff;
+}
+
+/* Keep Material typography consistent */
+button[mat-button],
+button[mat-flat-button] {
+    font-family: var(--arabic-font);
+}
+
+/* Small screens */
+@media (max-width: 480px) {
+    .card-header .card-title {
+        font-size: 1.1rem;
+    }
+}

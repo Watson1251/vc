@@ -1,0 +1,35 @@
+<!-- Load Button (only when not autoLoad and not yet loaded) -->
+<div *ngIf="!autoLoad && !isAudioLoaded" class="d-flex justify-content-center mb-3">
+    <div class="audio-preview" (click)="onLoadAudio()">
+        <mat-icon class="preview-icon">search</mat-icon>
+        <span class="preview-label">المقطع الصوتي</span>
+    </div>
+</div>
+
+<!-- Spinner Overlay -->
+<div *ngIf="isLoading" class="spinner-overlay">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+<!-- Show title once audio is loaded -->
+<div [hidden]="!isAudioLoaded">
+    <div class="wave-title mb-2 text-center" *ngIf="fileName" dir="ltr">{{ fileName }}</div>
+    <div id="waveform" #waveform></div>
+
+    <div class="controls" dir="ltr">
+        <button mat-icon-button type="button" color="primary" aria-label="Rewind 5 seconds" (click)="rewind()">
+            <mat-icon>replay_5</mat-icon>
+        </button>
+
+        <button mat-icon-button type="button" color="primary" aria-label="Play or Pause" (click)="togglePlayPause()">
+            <mat-icon>{{ isPlay ? 'pause' : 'play_arrow' }}</mat-icon>
+        </button>
+
+        <button mat-icon-button type="button" color="primary" aria-label="Forward 5 seconds" (click)="forward()">
+            <mat-icon>forward_5</mat-icon>
+        </button>
+    </div>
+
+</div>

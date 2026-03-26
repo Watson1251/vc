@@ -1,0 +1,4 @@
+window.__RUNTIME_CONFIG__ = {
+    APP_TITLE: "$APP_TITLE",
+    COMPANY_NAME: "$COMPANY_NAME",
+};

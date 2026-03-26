@@ -1,0 +1,247 @@
+:host {
+    display: block;
+    direction: rtl;
+}
+
+/* Panel container (targets MatDialog container via panelClass) */
+::ng-deep .mat-mdc-dialog-container.role-dialog-panel .mdc-dialog__surface {
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(21, 22, 34, .2);
+}
+
+/* Header */
+.rd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 6px;
+    border-bottom: 1px solid var(--bs-border-color, #e9ecef);
+}
+
+.rd-title {
+    margin: 0;
+    font-size: 1.25rem;
+    /* bigger, readable */
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.rd-close {
+    border: 0;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: #6c757d;
+}
+
+.rd-close:hover {
+    background: rgba(0, 0, 0, .04);
+}
+
+/* Content is scrollable, actions stick to bottom spacing-wise */
+.rd-content {
+    padding: 12px 16px 8px;
+}
+
+.mdc-dialog .mdc-dialog__content {
+    padding: 0;
+}
+
+/* neutralize MDC default */
+
+/* Form spacing */
+.rd-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.rd-field {}
+
+.rd-label {
+    display: inline-block;
+    margin-bottom: .35rem;
+    font-weight: 600;
+}
+
+.rd-input {
+    text-align: right;
+}
+
+/* RTL typing */
+.rd-error {
+    color: #dc3545;
+    font-size: .83rem;
+    margin-top: .25rem;
+}
+
+/* Chips area: comfortable wrap + scroll if long */
+.rd-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    max-height: 48vh;
+    /* keep dialog compact */
+    overflow: auto;
+    padding: .5rem;
+    border: 1px solid var(--bs-border-color, #e9ecef);
+    border-radius: .5rem;
+    background: #fff;
+}
+
+/* Chip button */
+.rd-chip {
+    border: 1px solid #e1e4ea;
+    background: #f8fafc;
+    color: #0f172a;
+    border-radius: 9999px;
+    padding: .35rem .75rem;
+    font-size: .9rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform .12s ease, background .12s ease, color .12s ease, border-color .12s ease;
+    user-select: none;
+}
+
+.rd-chip:hover {
+    transform: translateY(-1px);
+}
+
+.rd-chip.is-selected {
+    background: var(--bs-primary, #635bff);
+    border-color: var(--bs-primary, #635bff);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(99, 91, 255, .25);
+}
+
+.rd-chip:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+/* Actions row */
+.rd-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    padding-top: 4px;
+    border-top: 1px solid var(--bs-border-color, #e9ecef);
+    margin-top: 8px;
+}
+
+/* Make dialog content nicely scrollable if the viewport is short */
+::ng-deep .role-dialog-panel .mat-mdc-dialog-content {
+    max-height: 70vh;
+    /* overall dialog body height */
+    overflow: visible;
+    /* we handle overflow in .rd-chips */
+}
+
+label,
+button,
+input,
+.rd-error,
+.alert,
+.badge,
+.rd-title {
+    font-family: var(--arabic-font);
+}
+
+// role-dialog.component.scss (snippets)
+.rd-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.rd-chip {
+    border: 1px solid #e5e7eb;
+    border-radius: 9999px;
+    padding: .25rem .75rem;
+    background: #fff;
+    cursor: pointer;
+}
+
+.rd-chip.is-selected {
+    background: #0d6efd0f;
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.rd-admin-badge {
+    font-weight: 600;
+}
+
+/* Single permissions box with rows inside */
+.perm-box {
+    max-height: 48vh;
+    overflow: auto;
+    padding: .5rem;
+    border: 1px solid var(--bs-border-color, #e9ecef);
+    border-radius: .5rem;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.perm-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    /* Title gets ~25%, chips get ~75% */
+    align-items: start;
+    gap: .5rem .75rem;
+}
+
+.perm-row-title {
+    font-family: var(--arabic-font);
+    font-weight: 700;
+    color: #2b2f33;
+    text-align: right;
+    line-height: 2rem;
+    word-break: break-word;
+    /* allow long titles to wrap */
+}
+
+.perm-row-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    min-width: 0;
+    /* 🔑 prevents flex from overflowing */
+}
+
+.perm-row-header {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+}
+
+.perm-toggle {
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.perm-toggle:hover:not(:disabled) {
+    color: var(--bs-primary);
+}
+
+.perm-toggle .count {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.perm-row-title {
+    font-size: 0.95rem;
+}

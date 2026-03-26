@@ -1,0 +1,41 @@
+services:
+
+  frontend-vc:
+    image: frontend-vc:prod
+    container_name: frontend-vc
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfiles/Dockerfile.frontend.prod
+    ports:
+      # - "3010:80"   # HTTPS
+      # - "3015:443"   # HTTPS
+      - "4222:443"   # HTTPS
+    restart: unless-stopped
+    volumes:
+      - ../../security/certs:/certs
+    depends_on:
+      - backend-vc
+    environment:
+      NODE_ENV: production
+    command: >
+      sh -c '
+        : "$${APP_TITLE:=بيئة تشغيلية}";
+        : "$${COMPANY_NAME:=Company Name}";
+        envsubst < /usr/share/nginx/html/assets/env.template.js \
+          > /usr/share/nginx/html/assets/env.js &&
+        exec nginx -g "daemon off;"
+      ' 
+
+  backend-vc:
+    command: node server.js
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3005:3000"
+    volumes:
+      - ../../backend:/backend
+      - ../../security/certs:/certs
+      - ../../security/src/secure.js:/secure.js
+      - ../../security/src/rsa.js:/rsa.js
+      - ../../utils/logger:/logger
+      - ../../utils/rabbitmq:/rabbitmq

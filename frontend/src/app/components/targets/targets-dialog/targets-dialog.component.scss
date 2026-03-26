@@ -1,0 +1,306 @@
+/* Root */
+:host {
+    direction: rtl;
+    font-family: var(--arabic-font);
+    display: block;
+}
+
+/* Remove Material's default padding so the card can be edge-to-edge */
+::ng-deep .mat-mdc-dialog-container.card-dialog-panel .mdc-dialog__surface {
+    padding: 0 !important;
+    border-radius: 12px;
+}
+
+/* In case Material injects a content wrapper anywhere */
+::ng-deep .mat-mdc-dialog-container.card-dialog-panel .mdc-dialog__content,
+::ng-deep .mat-mdc-dialog-container.card-dialog-panel .mat-mdc-dialog-content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ensure our own wrapper/card don’t add accidental margins */
+.card-dialog {
+    margin: 0 !important;
+}
+
+.card {
+    margin: 0 !important;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-footer {
+    margin: 0 !important;
+}
+
+/* Optional: shadow similar to cards on pages (Material adds some by default) */
+::ng-deep .mat-mdc-dialog-container.card-dialog-panel {
+    border-radius: 12px;
+    font-family: var(--arabic-font);
+}
+
+/* Card shell inside the dialog */
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Title look to match your page */
+.card-title {
+    font-family: var(--arabic-font);
+    font-weight: bolder;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+/* Body text + RTL niceties */
+.card-body {
+    font-family: var(--arabic-font);
+    text-align: right;
+}
+
+/* Labels mimic your page form labels */
+.label-rtl {
+    display: inline-block;
+    margin-bottom: .35rem;
+    font-weight: bolder;
+    color: #6b7280;
+    /* gray-500-ish like your .label */
+    font-family: var(--arabic-font);
+}
+
+/* Inputs: same RTL behavior you already use */
+.rtl-input {
+    direction: rtl;
+    text-align: right !important;
+}
+
+.rtl-input::placeholder {
+    text-align: right;
+    opacity: .6;
+}
+
+/* Bootstrap invalid state harmonized with your colors */
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.invalid-feedback {
+    display: block;
+    text-align: right;
+    font-family: var(--arabic-font);
+}
+
+/* Delete mode text tone */
+.dlg-text {
+    color: rgba(54, 59, 57, .88);
+    font-weight: 600;
+}
+
+/* Footer actions: comfy spacing like your toolbar buttons */
+.card-footer {
+    background: #fff;
+}
+
+/* Keep Material typography consistent */
+button[mat-button],
+button[mat-flat-button],
+button {
+    font-family: var(--arabic-font);
+}
+
+::ng-deep .mat-step-text-label {
+    font-family: var(--arabic-font);
+}
+
+/* Inputs & textareas (plain fields) */
+.form-control.rtl-input {
+    direction: rtl;
+    text-align: right !important;
+    font-family: var(--arabic-font);
+    font-size: 0.95rem;
+}
+
+.form-control.rtl-input::placeholder {
+    text-align: right;
+    opacity: .6;
+    font-family: var(--arabic-font);
+}
+
+/* Focus ring to match your palette */
+.form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+}
+
+/* Invalid state (Bootstrap-compatible) */
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.invalid-feedback {
+    display: block;
+    text-align: right;
+    font-family: var(--arabic-font);
+    font-size: 0.85rem;
+}
+
+/* Keep labels consistent */
+.form-label.label-rtl {
+    display: inline-block;
+    margin-bottom: .35rem;
+    font-weight: 700;
+    color: #6b7280;
+    font-family: var(--arabic-font);
+}
+
+.uploaded-list {
+    font-family: var(--arabic-font);
+
+    .uploaded-item {
+        background: #f9fafb;
+        border-radius: 6px;
+        padding: .25rem .5rem;
+        font-size: .9rem;
+        color: #374151;
+    }
+
+    mat-icon {
+        font-size: 18px;
+    }
+
+    button[mat-icon-button] {
+        margin-inline-start: 0.5rem;
+    }
+}
+
+
+/* Review grid */
+.review-section {
+    display: grid;
+    gap: 12px;
+    font-family: var(--arabic-font);
+}
+
+.review-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 12px;
+    align-items: start;
+
+    @media (max-width: 576px) {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+}
+
+.review-label {
+    color: #6b7280;
+    /* gray-500 */
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.review-value {
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+/* Count bubble next to section titles */
+.count-chip {
+    display: inline-block;
+    min-width: 28px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #eef2ff;
+    /* soft indigo */
+    color: #4338ca;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+/* File chips */
+.chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    display: inline-block;
+    max-width: 100%;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    /* gray-100 */
+    color: #374151;
+    /* gray-700 */
+    border: 1px solid #e5e7eb;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: ltr;
+    /* better for filenames */
+}
+
+
+/* Stepper Scroll Container */
+.scrollable-stepper {
+    max-height: 60vh;
+    /* adjust based on dialog size */
+    overflow-y: auto;
+    padding-right: 8px;
+    /* space for scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+/* Hide horizontal overflow */
+.scrollable-stepper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-stepper::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.scrollable-stepper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Prevent mat-step labels from shrinking */
+::ng-deep .mat-horizontal-stepper-header-container {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+/* Make sure step content doesn't push footer down */
+.mat-step-content {
+    overflow: visible;
+}
+
+/* make the trailing “+N” chip look subtle */
+.chip-more {
+    direction: rtl;
+    font-weight: 600;
+    opacity: 0.85;
+    background-color: #f3f3f3;
+    border: 1px solid #ddd;
+}
+
+.text-muted.fst-italic {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-family: var(--arabic-font);
+}
+
+/* Small screens */
+@media (max-width: 480px) {
+    .card-header .card-title {
+        font-size: 1.1rem;
+    }
+}

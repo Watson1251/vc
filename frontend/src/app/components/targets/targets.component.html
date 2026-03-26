@@ -1,0 +1,203 @@
+<div class="container-fluid">
+    <div class="row g-3 align-items-stretch">
+        <div class="col order-lg-1">
+            <div class="card w-100" style="margin-top: 50px;">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <h3 class="card-title">الأهداف محل الاستنساخ</h3>
+                    <div class="flex-grow-1"></div>
+                    <button type="button" class="info-3d-btn" (click)="onInfoClick('targets')"
+                        matTooltip="دليل المستخدم" aria-label="مساعدة">
+                        <span class="info-italic">i</span>
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <!-- Toolbar -->
+                    <div class="d-flex align-items-stretch mb-3 w-100 gap-2">
+                        <!-- Global search -->
+                        <div class="input-group flex-grow-1 flex-row-reverse">
+                            <span class="input-group-text"><i class="ri-search-line"></i></span>
+                            <input type="text" class="form-control rtl-input" placeholder="ابحث ضمن الأهداف..."
+                                [(ngModel)]="globalSearch" (input)="applyFilter()" style="min-width: 0;" />
+                        </div>
+
+                        <!-- Add target -->
+                        <button *ngIf="canCreate"
+                            class="btn btn-outline-primary d-flex align-items-center justify-content-center h-100 px-3"
+                            style="white-space: nowrap;" (click)="onAddTarget()">
+                            <i class="ri-add-circle-line ms-1"></i> إضافة هدف
+                        </button>
+
+                        <!-- Refresh -->
+                        <button
+                            class="btn btn-outline-warning d-flex align-items-center justify-content-center h-100 px-3"
+                            style="white-space: nowrap;" (click)="refresh()">
+                            <i class="ri-refresh-line ms-1"></i> تحديث
+                        </button>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="p-3 preview" *ngIf="canRead; else noRead">
+                        <!-- Preview player (shown when chip is clicked) -->
+                        <div class="mb-3" *ngIf="previewFileId">
+                            <app-wavesurfer [fileId]="previewFileId" [autoLoad]="true" [enhanced]="false"
+                                [showRegionOverlay]="false" [showRegionRemove]="false">
+                            </app-wavesurfer>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center align-middle" style="width:6%">ت</th>
+                                        <th class="text-center align-middle" style="width:20%">الاسم</th>
+                                        <th class="text-center align-middle">المادة المرجعية</th>
+                                        <th class="text-center align-middle">مواد التدريب</th>
+                                        <th class="text-center align-middle" style="width:10%">حالة تدريب النموذج</th>
+                                        <th class="text-center align-middle" style="width:10%">الإجراءات</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let t of pagedTargets; index as i2" (click)="onRowSelect(t)"
+                                        [class.selected-row]="isSelected(t)" [attr.aria-selected]="isSelected(t)"
+                                        style="cursor: pointer;">
+                                        <!-- # -->
+                                        <td class="text-center">
+                                            {{ pageIndex * pageSize + i2 + 1 }}
+                                        </td>
+
+                                        <!-- Name + description -->
+                                        <td class="text-center text-break">
+                                            <div class="fw-bold">{{ t.name }}</div>
+                                            <div class="text-muted small">{{ t.description || '' }}</div>
+                                        </td>
+
+                                        <!-- Reference audio chip (single) -->
+                                        <td class="text-center">
+                                            <ng-container *ngIf="firstRef(t) as rf; else noRef">
+                                                <span class="chip chip-clickable"
+                                                    [title]="(rf?.filename || rf?.id) || ''"
+                                                    (click)="$event.stopPropagation(); onChipClick(rf)">
+                                                    {{ (rf?.filename || rf?.id) | slice:0:25 }}
+                                                </span>
+                                            </ng-container>
+                                            <ng-template #noRef>
+                                                <span class="text-muted">لا يوجد</span>
+                                            </ng-template>
+                                        </td>
+
+                                        <!-- Training audio chips -->
+                                        <td class="text-center">
+                                            <ng-container *ngIf="t.trainingAudio?.length; else noTrain">
+                                                <div
+                                                    class="chips-wrap d-inline-flex flex-wrap justify-content-center gap-1">
+                                                    <span *ngFor="let f of visibleFiles(t, 'train')"
+                                                        class="chip chip-clickable" [title]="f.filename || f.id"
+                                                        (click)="$event.stopPropagation(); onChipClick(f)">
+                                                        {{ (f.filename || f.id) | slice:0:25 }}
+                                                    </span>
+
+                                                    <!-- Training chips footer -->
+                                                    <span class="chip chip-more" *ngIf="remainingCount(t, 'train') > 0"
+                                                        (click)="$event.stopPropagation(); onMoreClick(t, 'train')">
+                                                        +{{ remainingCount(t, 'train') }} أخرى
+                                                    </span>
+                                                    <span class="chip chip-more"
+                                                        *ngIf="remainingCount(t, 'train') === 0 && isExpanded(t, 'train')"
+                                                        (click)="$event.stopPropagation(); onMoreClick(t, 'train')">
+                                                        إظهار أقل
+                                                    </span>
+
+                                                </div>
+                                            </ng-container>
+                                            <ng-template #noTrain>
+                                                <span class="text-muted">لا يوجد</span>
+                                            </ng-template>
+                                        </td>
+
+                                        <!-- NEW: Status cell -->
+                                        <td class="text-center">
+                                            <span class="badge" [ngClass]="statusClass(t.status)">
+                                                {{ statusLabel(t.status) }}
+                                            </span>
+                                            <!-- <div class="small mt-1" *ngIf="t.isTrained">
+                                                <i class="ri-check-line"></i> مُدرَّب
+                                            </div> -->
+                                        </td>
+
+                                        <!-- Actions -->
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+
+                                                <!-- Train / Retry -->
+                                                <button class="btn btn-sm"
+                                                    [ngClass]="t.status === 'FAILED' ? 'btn-outline-warning' : 'btn-outline-success'"
+                                                    type="button"
+                                                    [title]="t.status === 'FAILED' ? 'إعادة المحاولة' : 'ابدأ التدريب'"
+                                                    *ngIf="t.status === 'NOT_SCHEDULED' || t.status === 'FAILED'"
+                                                    (click)="$event.stopPropagation(); onTrain(t)">
+                                                    <i class="ri-cpu-line" *ngIf="t.status !== 'FAILED'"></i>
+                                                    <i class="ri-refresh-line" *ngIf="t.status === 'FAILED'"></i>
+                                                </button>
+
+                                                <!-- Cancel scheduled training -->
+                                                <button class="btn btn-sm btn-outline-secondary" type="button"
+                                                    title="إلغاء الجدولة"
+                                                    *ngIf="t.status === 'SCHEDULED' || t.status === 'STARTED_TRAINING'"
+                                                    (click)="$event.stopPropagation(); onCancelSchedule(t)">
+                                                    <i class="ri-close-circle-line"></i>
+                                                </button>
+
+                                                <!-- Retrain (after DONE) -->
+                                                <button class="btn btn-sm btn-outline-info" type="button"
+                                                    title="إعادة التدريب" *ngIf="t.status === 'DONE'"
+                                                    (click)="$event.stopPropagation(); onRetrain(t)">
+                                                    <i class="ri-refresh-line"></i>
+                                                </button>
+
+                                                <!-- Edit -->
+                                                <button class="btn btn-sm btn-outline-primary" type="button"
+                                                    title="تعديل" [disabled]="!canUpdate"
+                                                    (click)="$event.stopPropagation(); onEditTarget(t)">
+                                                    <i class="ri-edit-2-line"></i>
+                                                </button>
+
+                                                <!-- Delete -->
+                                                <button class="btn btn-sm btn-outline-danger" type="button" title="حذف"
+                                                    [disabled]="!canDelete"
+                                                    (click)="$event.stopPropagation(); onDeleteTarget(t)">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr *ngIf="pagedTargets.length === 0">
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            لا يوجد أهداف مسجلين
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                        <div *ngIf="filteredTargets.length > 5">
+                            <app-paginator [length]="filteredTargets.length" [pageSize]="pageSize"
+                                [pageIndex]="pageIndex" (pageChange)="onPageChange($event)"></app-paginator>
+                        </div>
+                    </div>
+
+                    <!-- Fallback when no permission -->
+                    <ng-template #noRead>
+                        <div class="p-3 preview d-flex justify-content-center">
+                            <span class="text-muted empty-tweets-text">لا تملك صلاحية عرض الأهداف</span>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,174 @@
+@font-face {
+  font-family: "traditional-arabic";
+  src: local("traditional-arabic"),
+    url(./fonts/traditional-arabic.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "decotype";
+  src: local("decotype"), url("./fonts/deco.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "din";
+  src: local("din"), url("./fonts/din.ttf") format("truetype");
+}
+
+:root {
+  --arabic-font: "din", Arial, sans-serif;
+
+  --main-color: rgba(119, 59, 3, 0.714);
+  --secondary-color: rgba(119, 59, 3, 0.3);
+  --toolbar-focus-color: #576dee;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
+  font-family: var(--arabic-font) !important;
+  font-weight: bolder !important;
+  color: rgb(255, 255, 255) !important;
+}
+
+/* Snackbar css */
+.mat-mdc-snack-bar-container .mdc-snackbar__label {
+  font-family: var(--arabic-font) !important;
+}
+
+.mat-mdc-snack-bar-container {
+  &.success {
+    --mdc-snackbar-container-color: rgba(71, 136, 25, 0.662);
+    --mat-snack-bar-button-color: rgb(255, 255, 255) !important;
+    --mdc-snackbar-supporting-text-color: rgb(255, 255, 255) !important;
+    white-space: pre-wrap;
+  }
+
+  &.failure {
+    --mdc-snackbar-container-color: rgba(136, 47, 25, 0.662);
+    --mat-snack-bar-button-color: rgb(255, 255, 255) !important;
+    --mdc-snackbar-supporting-text-color: rgb(255, 255, 255) !important;
+    white-space: pre-wrap;
+  }
+
+  direction: rtl;
+}
+
+
+.info-3d-btn {
+  --size: 28px;
+  --btn-color: #dbe2eb;
+  /* Table-like gray/blue shade */
+  --btn-border: #c3ccd9;
+  /* Slightly darker border */
+  --btn-hover: #e4eaf1;
+  /* Soft hover shade */
+
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: transparent;
+  /* No full fill initially */
+  border: 2px solid var(--btn-border);
+  color: #c3ccd9;
+  /* Muted text color */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: box-shadow 0.2s ease, transform 0.15s ease, background 0.15s ease;
+
+  /* Hover effect: soft glow + light fill */
+  &:hover {
+    transform: translateY(-1px);
+    background: var(--btn-hover);
+    box-shadow: 0 0 4px rgba(195, 204, 217, 0.5);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 0 3px rgba(195, 204, 217, 0.3);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+/* Italic i inside button */
+.info-italic {
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Ensure Angular CDK overlay is truly viewport-sized */
+.cdk-overlay-container {
+  position: fixed !important;
+  inset: 0 !important;
+  /* top/right/bottom/left: 0 */
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2000;
+  /* above your header/sidebar */
+}
+
+.cdk-overlay-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  pointer-events: auto !important;
+  /* receive clicks to close */
+}
+
+/* Optional nicer backdrop */
+.help-backdrop {
+  background: rgba(12, 18, 28, 0.35);
+}
+
+/* panelClass from open(): 'help-dialog-panel' */
+/* 1) Let the dialog surface fill the overlay and become a flex column */
+.help-dialog-panel .mat-mdc-dialog-surface {
+  padding: 0;
+  /* we control padding inside */
+  height: 100%;
+  /* KEY: allow children to take full height */
+  display: flex;
+  /* so .mat-mdc-dialog-content can flex */
+  overflow: hidden;
+  font-family: var(--arabic-font);
+}
+
+/* 2) The internal dialog-content wrapper must also flex to 100% */
+.help-dialog-panel .mat-mdc-dialog-content {
+  padding: 0;
+  /* remove default padding */
+  margin: 0;
+  height: 100%;
+  /* KEY */
+  max-height: none;
+  /* override Material max-height */
+  display: flex;
+  /* pass flex down to your component root */
+  flex-direction: column;
+  overflow: hidden;
+  /* children handle their own scroll */
+}
+
+/* (Optional) If you see any extra wrapper limiting height, clear it too */
+.help-dialog-panel .mdc-dialog__content {
+  height: 100%;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}

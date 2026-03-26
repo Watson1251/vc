@@ -1,0 +1,8 @@
+flask
+gunicorn
+uvicorn
+python-multipart
+soundfile
+scipy
+numpy
+cryptography

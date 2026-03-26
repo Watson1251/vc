@@ -1,0 +1,1020 @@
+/* ===== Typography consistency (same as your other component) ===== */
+.no-items-text {
+    font-family: var(--arabic-font);
+    font-weight: bolder;
+    color: rgba(54, 59, 57, .78);
+    padding-block: 120px 40px;
+    text-align: center;
+}
+
+
+.card-title {
+    font-family: var(--arabic-font);
+    font-weight: bolder;
+}
+
+th,
+td,
+button,
+input {
+    font-family: var(--arabic-font);
+}
+
+/* ===== Dialog look (keep if you open device dialogs later) ===== */
+::ng-deep .mat-mdc-dialog-container.device-dialog-panel {
+    border-radius: 12px;
+    padding: 1rem;
+    font-family: var(--arabic-font);
+}
+
+::ng-deep .device-dialog-panel .modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--arabic-font);
+}
+
+/* ===== RTL inputs ===== */
+.rtl-input {
+    direction: rtl;
+    text-align: right !important;
+}
+
+.rtl-input::placeholder {
+    text-align: right;
+    opacity: .6;
+}
+
+/* ===== Badges (subtle success/secondary) ===== */
+.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.12);
+}
+
+.bg-secondary-subtle {
+    background-color: rgba(108, 117, 125, 0.12);
+}
+
+/* ===== Table styling to match your aesthetic ===== */
+.table {
+    --row-hover: rgba(0, 0, 0, 0.03);
+}
+
+.table tbody tr:hover {
+    background: var(--row-hover);
+}
+
+/* Keep header visible for wide/long tables when scrolling horizontally */
+.table-responsive thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Center utilities so you don’t repeat inline styles */
+th.text-center,
+td.text-center {
+    vertical-align: middle;
+}
+
+/* Buttons in the actions column */
+td .btn {
+    min-width: 90px;
+}
+
+/* Make the “-” placeholders look intentionally muted */
+td.text-muted {
+    color: var(--bs-secondary-color, #6b7280) !important;
+}
+
+/* Optional: tight spacing on compact screens */
+@media (max-width: 768px) {
+    .card-body .input-group-text {
+        padding-inline: .5rem;
+    }
+
+    .card-body .btn {
+        padding-inline: .75rem;
+    }
+}
+
+/* merged device cell */
+.device-name-container {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-width: 220px;
+}
+
+.device-icon-wrapper {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--bs-border-color, #e5e7eb);
+    background: #fff;
+}
+
+.device-icon {
+    font-size: 22px;
+    line-height: 1;
+    color: var(--bs-secondary-color, #6b7280);
+}
+
+/* small status dot overlayed on the icon wrapper */
+.status-dot {
+    position: absolute;
+    inset-inline-end: -2px;
+    /* RTL-aware */
+    inset-block-end: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 2px solid #fff;
+}
+
+.status-dot.online {
+    background: #16a34a;
+}
+
+/* green */
+.status-dot.offline {
+    background: #9ca3af;
+}
+
+/* gray */
+
+.device-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.device-name {
+    font-weight: 600;
+    /* truncation safety */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: min(38vw, 420px);
+}
+
+/* highlight missing name */
+.warning-field {
+    color: #b45309;
+    /* amber-700-ish */
+}
+
+/* keep existing styles you already had... */
+
+/* PHONE FRAME */
+.smartphone {
+    width: 800px;
+    height: 800px;
+    background: url('./../../../assets/iphone-frame.png') no-repeat center center;
+    background-size: contain;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* SCREEN AREA */
+.screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 80%;
+    padding: 20px;
+    gap: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    scrollbar-color: #8aa6c1 transparent;
+    /* Firefox */
+}
+
+.status-dot.loading {
+    background: #ffc107;
+    animation: pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(0.7);
+        opacity: 0.6;
+    }
+}
+
+/* setup.component.scss */
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-inline-start: 4px;
+}
+
+.status-dot.online {
+    background: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, .18);
+}
+
+/* green */
+.status-dot.offline {
+    background: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, .18);
+}
+
+/* red   */
+.status-dot.loading {
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, .18);
+    /* amber */
+    animation: pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        opacity: .55
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+
+.stream-screen {
+    width: 60%;
+}
+
+/* WebKit scrollbars */
+.screen::-webkit-scrollbar {
+    width: 5px;
+}
+
+.screen::-webkit-scrollbar-thumb {
+    background-color: #8aa6c1;
+    border-radius: 5px;
+}
+
+.screen::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* INPUTS (form fields inside the screen) */
+.input-field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    color: #333;
+    padding: 5px;
+    text-align: center;
+    /* RTL-friendly */
+    font-family: var(--arabic-font);
+    border-bottom: 1px solid #d1d1d6;
+    /* iOS-like */
+    outline: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.input-field:focus {
+    border-bottom: 1px solid #007bff;
+}
+
+/* Validation state */
+.invalid-input,
+.invalid-input:focus {
+    border-bottom: 1px solid red !important;
+}
+
+/* Number input tweaks */
+.input-field[type=number]::-webkit-outer-spin-button,
+.input-field[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-field[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* PIN reveal-on-click container */
+.pin-container {
+    cursor: pointer;
+}
+
+.masked-pin {
+    color: #888;
+}
+
+.visible-pin {
+    color: #000;
+    font-weight: bold;
+}
+
+/* PIN input with eye icon */
+.pin-input-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex-direction: row-reverse;
+    /* icon on the left in RTL */
+}
+
+.pin-input-container input {
+    flex: 1;
+    padding-left: 35px;
+    /* space for icon */
+    padding-right: 10px;
+}
+
+.pin-input-container .visibility-icon {
+    position: absolute;
+    left: 10px;
+    cursor: pointer;
+    color: gray;
+}
+
+.pin-input-container .visibility-icon:hover {
+    color: black;
+}
+
+/* Angular Material typography inside the screen */
+mat-label,
+input,
+mat-error,
+button,
+::ng-deep .mdc-form-field {
+    font-family: var(--arabic-font);
+}
+
+mat-error {
+    font-size: 12px;
+    color: red;
+}
+
+.disabled-input {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.mat-form-field {
+    width: 100%;
+    direction: rtl;
+}
+
+.mat-select,
+.mat-mdc-option {
+    font-family: var(--arabic-font) !important;
+}
+
+.mat-mdc-option {
+    background-color: white !important;
+}
+
+.example-additional-selection {
+    font-size: 14px;
+    color: gray;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+/* Hide Material underlines/subscript (clean iOS-like look) */
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+}
+
+::ng-deep .mdc-line-ripple {
+    display: none !important;
+}
+
+/* Ensure the dropdown has a white background */
+::ng-deep .mat-mdc-select-panel {
+    background-color: white !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .2) !important;
+}
+
+/* Accounts select option look (inside screen) */
+.no-accounts-message {
+    color: blue;
+    text-decoration: underline;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+    font-family: var(--arabic-font);
+}
+
+.account-option {
+    display: flex;
+    flex-direction: column;
+}
+
+.account-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+}
+
+.account-username {
+    font-size: 12px;
+    color: gray;
+}
+
+/* Logo + title inside the screen */
+.logo {
+    width: 100px;
+}
+
+.title {
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    font-family: var(--arabic-font);
+    font-weight: bolder;
+}
+
+/* Content container within the screen */
+.content {
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    width: 80%;
+    padding: 15px;
+}
+
+/* “No device selected” message inside the screen */
+.no-device {
+    font-size: 18px;
+    color: #888;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-family: var(--arabic-font);
+}
+
+/* Form items inside the screen */
+.item {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 15px;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.label {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 3px;
+    font-weight: bolder;
+    font-family: var(--arabic-font);
+}
+
+.value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    font-family: var(--arabic-font);
+}
+
+.divider {
+    padding: 5px 0;
+}
+
+/* Action buttons inside the screen */
+.action-btn {
+    background: #007bffc8;
+    /* iOS blue */
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bolder;
+    text-align: center;
+    width: 90%;
+    max-width: 280px;
+    transition: all .2s ease-in-out;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .15);
+}
+
+.enabled-btn {
+    background: #007bff !important;
+    cursor: pointer;
+}
+
+.enabled-btn:hover {
+    background: #005ecb !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
+}
+
+.enabled-btn:active {
+    background: #004ea1 !important;
+    transform: scale(.98);
+}
+
+.delete-btn {
+    background: #f32222c8 !important;
+}
+
+.delete-enabled-btn {
+    background: #f32222c8 !important;
+    cursor: pointer;
+}
+
+.delete-enabled-btn:hover {
+    background: #f32222f4 !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
+}
+
+.delete-enabled-btn:active {
+    background: #f32222c8 !important;
+    transform: scale(.98);
+}
+
+.disabled-btn {
+    background: #d1d1d6 !important;
+    color: #a1a1a6 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    opacity: .6 !important;
+}
+
+/* Selected row highlight */
+.selected-row {
+    background: rgba(59, 130, 246, 0.08);
+    border: #3b82f6;
+    /* blue-500 @ 8% */
+}
+
+.selected-row td {
+    // box-shadow: inset 3px 0 0 0 #3b82f6;
+    /* left accent bar */
+}
+
+/* Optional: keyboard/aria focus feel */
+tr[aria-selected="true"]:hover {
+    background: rgba(59, 130, 246, 0.12);
+}
+
+/* Center placeholder text for phone input */
+.input-field[type="tel"]::placeholder {
+    text-align: center;
+    width: 100%;
+    display: block;
+    /* ensures centering works consistently */
+}
+
+/* Actions row layout: full-width grid */
+.screen-actions {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+}
+
+/* One button fills the row */
+.screen-actions.one {
+    grid-template-columns: 1fr;
+}
+
+/* Two equal buttons on the same row */
+.screen-actions.two {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Make button stretch its grid cell */
+.action-btn {
+    width: 100%;
+    max-width: none;
+    /* override previous 280px cap */
+}
+
+/* Layout row for icon + box */
+.name-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Keep your existing device-icon-wrapper styles */
+.device-icon-wrapper {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--bs-border-color, #e5e7eb);
+    background: #fff;
+}
+
+/* White rounded rectangle that contains name + serial */
+.name-box {
+    flex: 1;
+    background: #f8f9fa;
+    /* soft gray like iOS card */
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* center text horizontally */
+}
+
+/* serial small line inside the name box */
+.serial-line {
+    margin-top: 6px;
+    text-align: center;
+    width: 100%;
+}
+
+/* narrow the text field inside name-box to look nicer */
+.name-box .device-name {
+    max-width: 100%;
+}
+
+/* make the action buttons row fill width and keep alignment */
+.screen-actions.one,
+.screen-actions.two {
+    width: 100%;
+    display: grid;
+    gap: 10px;
+}
+
+.screen-actions.one {
+    grid-template-columns: 1fr;
+}
+
+.screen-actions.two {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* PIN hover reveal (Registered table rows) */
+.table tbody tr {
+
+    /* scope hover to the whole row for better UX */
+    &:hover .pin-cell {
+        .pin-show {
+            opacity: 1;
+            filter: blur(0);
+        }
+
+        .pin-hide {
+            opacity: 0;
+        }
+    }
+}
+
+.pin-cell {
+    position: relative;
+    display: inline-block;
+    min-width: 56px;
+
+    /* prevents layout jump */
+    .pin-hide,
+    .pin-show {
+        transition: opacity 160ms ease, filter 160ms ease;
+        display: inline-block;
+    }
+
+    .pin-show {
+        opacity: 0;
+        filter: blur(4px);
+        /* subtle anti-shoulder-surfing until hover */
+    }
+}
+
+/* Account chips */
+.acc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    padding: .2rem .5rem;
+    margin: .125rem;
+    border-radius: 9999px;
+    background-color: #f6f7f9;
+    border: 1px solid #e5e7eb;
+    font-size: .78rem;
+    line-height: 1rem;
+    direction: rtl;
+
+    /* keep Arabic flow tidy */
+    .u {
+        font-weight: 600;
+    }
+
+    .sep {
+        opacity: .65;
+    }
+
+    .n {
+        opacity: .9;
+    }
+}
+
+.acc-chip {
+    max-width: 220px;
+
+    .u,
+    .n {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.accounts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.acc-row {
+    display: flex;
+    justify-content: center;
+    /* center inside the phone screen */
+    align-items: baseline;
+    font-size: 0.9rem;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.acc-name {
+    font-weight: 600;
+    max-width: 65%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--arabic-font);
+}
+
+.acc-sep {
+    padding: 0 .35rem;
+    color: #94a3b8;
+}
+
+.acc-username {
+    direction: ltr;
+    /* keep @username readable in RTL */
+    font-family: var(--arabic-font);
+    color: #64748b;
+    max-width: 35%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.acc-row[title],
+.acc-name[title] {
+    cursor: help;
+}
+
+.label-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+
+    .label {
+        flex: 1;
+    }
+
+    .resetup-btn {
+        white-space: nowrap;
+    }
+}
+
+/* Tabs look */
+.libs-tablist {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: .75rem;
+}
+
+.tab-button {
+    border: 1px solid var(--bs-border-color, #e5e7eb);
+    background: #fff;
+    color: #111827;
+    border-radius: 9999px;
+    padding: .35rem .9rem;
+    line-height: 1;
+    font-family: var(--arabic-font);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tab-button.c-tab-active,
+.tab-button.active {
+    background: var(--bs-primary, #635bff);
+    color: #fff;
+    border-color: var(--bs-primary, #635bff);
+    box-shadow: 0 2px 10px rgba(99, 91, 255, .22);
+}
+
+.add-category-btn {
+    border-style: dashed;
+}
+
+.edit-icon {
+    font-size: 18px;
+    opacity: .9;
+    cursor: pointer;
+}
+
+.tab-title {
+    font-family: var(--arabic-font);
+}
+
+.empty-cats {
+    display: grid;
+    place-items: center;
+    min-height: 220px; // keeps the card body roomy
+    cursor: pointer;
+}
+
+.empty-cats-text {
+    font-family: var(--arabic-font);
+    font-weight: 700;
+    color: rgba(54, 59, 57, 0.8);
+    text-decoration: underline;
+}
+
+.empty-tweets-text {
+    font-family: var(--arabic-font);
+    font-weight: 700;
+    color: rgba(54, 59, 57, 0.8);
+}
+
+/* Optional: ensure textarea fills width nicely inside Material field */
+.full-width textarea[matInput] {
+    width: 100%;
+    text-align: start; // keeps RTL labels but natural text flow for Arabic
+    font-family: var(--arabic-font);
+}
+
+/* Force font for mat-select value text */
+::ng-deep .mat-mdc-select-value-text {
+    font-family: var(--arabic-font) !important;
+}
+
+/* Turn the counter amber at >= 260, red at 280 */
+.screen .content .item mat-form-field ::ng-deep .mat-mdc-form-field-hint {
+    font-family: var(--arabic-font);
+}
+
+.screen .content .item mat-form-field.counter-warn ::ng-deep .mat-mdc-form-field-hint {
+    color: #b45309;
+    /* amber-700-ish */
+}
+
+.screen .content .item mat-form-field.counter-max ::ng-deep .mat-mdc-form-field-hint {
+    color: #dc2626;
+    /* red-600-ish */
+}
+
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+}
+
+/* Re-enable subscript area (hints/errors) for tweet fields only */
+:host ::ng-deep .tweet-field .mat-mdc-form-field-subscript-wrapper {
+    display: flex !important;
+    /* Material uses flex */
+}
+
+/* Optional: warning colors near the limit */
+.screen .content .item .tweet-field ::ng-deep .mat-mdc-form-field-hint {
+    font-family: var(--arabic-font);
+}
+
+.screen .content .item .tweet-field.counter-warn ::ng-deep .mat-mdc-form-field-hint {
+    color: #b45309;
+    /* amber-ish */
+}
+
+.screen .content .item .tweet-field.counter-max ::ng-deep .mat-mdc-form-field-hint {
+    color: #dc2626;
+    /* red-ish */
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .2rem .6rem;
+    border-radius: 9999px;
+    font-size: .82rem;
+    font-weight: 700;
+    font-family: var(--arabic-font);
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.status-badge.unused {
+    /* غير مستخدمة */
+    color: #16a34a;
+    /* green-600 */
+    background: rgba(22, 163, 74, .10);
+    border-color: rgba(22, 163, 74, .25);
+}
+
+.status-badge.used {
+    /* تم استخدامها */
+    color: #374151;
+    /* gray-700 */
+    background: rgba(107, 114, 128, .12);
+    /* gray-ish */
+    border-color: rgba(107, 114, 128, .25);
+}
+
+/* container is flex */
+.screen-actions {
+    display: flex;
+    gap: 12px;
+
+    &.two .action-btn {
+        flex: 1 1 50%;
+    }
+
+    &.one .action-btn {
+        flex: 1 1 100%;
+    }
+
+    // full width when only one button
+}
+
+.empty-cats.is-clickable {
+    cursor: pointer;
+}
+
+.empty-cats.is-clickable:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.is-clickable {
+    cursor: pointer;
+}
+
+/* sound-effects.component.scss */
+:host ::ng-deep .mat-mdc-tab .mdc-tab__text-label .all-effects-tab {
+    color: #0ea5e9;
+    /* cyan-ish */
+    font-weight: 700;
+}
+
+:host ::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label .all-effects-tab {
+    color: #0284c7;
+    /* darker when active */
+}
+
+/* sound-effects.component.scss */
+.all-effects-tab {
+    padding: .25rem .75rem;
+    border-radius: 999px;
+    background: #e3f2fd;
+    /* light primary */
+    color: #0d47a1;
+    /* darker primary text */
+    font-weight: 600;
+}
+
+.badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+    vertical-align: middle;
+}
+
+.badge-danger {
+    background-color: #dc3545 !important;
+    /* Bootstrap danger red */
+    color: #fff;
+}
+
+.badge-primary {
+    background-color: #0d6efd !important;
+    /* All tab count */
+}
+
+.badge-secondary {
+    background-color: #6c757d !important;
+    /* Per-type count */
+}

@@ -1,0 +1,12 @@
+python3 inference.py --source ../vc/TEMP/requests/Muataz_Mishal_sub.wav \
+--target ../vc/TEMP/requests/faisal_alqasim_sub.wav \
+--output ../vc/TEMP/clone \
+--diffusion-steps 25 \ 
+--length-adjust 1.0 \
+--inference-cfg-rate 0.7 \
+--f0-condition False \ 
+--auto-f0-adjust False \ 
+--semi-tone-shift 0 \ 
+--checkpoint /my_target/ft_model.pth \
+--config my_target/config_dit_mel_seed_uvit_whisper_small_wavenet.yml \
+ --fp16 True

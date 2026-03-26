@@ -1,0 +1,110 @@
+<!-- Title bar -->
+<div class="rd-header">
+    <h2 class="rd-title">{{ title }}</h2>
+    <button class="rd-close" type="button" aria-label="Close" (click)="onCancel()">
+        <i class="ri-close-line"></i>
+    </button>
+</div>
+
+<!-- Content -->
+<div class="rd-content">
+    <form [formGroup]="form" (ngSubmit)="onSave()" class="rd-form">
+
+        <!-- Full name -->
+        <div class="rd-field">
+            <label class="rd-label">الاسم الكامل</label>
+            <input type="text" class="form-control rd-input" formControlName="name" placeholder="محمد أحمد" />
+            <div class="rd-error" *ngIf="ctrl('name').touched && ctrl('name').invalid">
+                الاسم مطلوب.
+            </div>
+        </div>
+
+        <!-- Username -->
+        <div class="rd-field">
+            <label class="rd-label">اسم المستخدم</label>
+            <input type="text" class="form-control rd-input" formControlName="username" placeholder="username123" />
+
+            <!-- Required -->
+            <div class="rd-error" *ngIf="ctrl('username').touched && ctrl('username').hasError('required')">
+                اسم المستخدم مطلوب.
+            </div>
+
+            <!-- Max length -->
+            <div class="rd-error" *ngIf="ctrl('username').touched && ctrl('username').hasError('maxlength')">
+                اسم المستخدم يجب أن لا يتجاوز ٦٤ حرفًا.
+            </div>
+
+            <!-- Already taken -->
+            <div class="rd-error" *ngIf="ctrl('username').touched && ctrl('username').hasError('usernameTaken')">
+                اسم المستخدم مستخدم بالفعل.
+            </div>
+        </div>
+
+        <!-- Password (create & edit) -->
+        <div class="rd-field" dir="ltr">
+            <label class="rd-label">
+                كلمة المرور
+                <small class="text-muted" *ngIf="mode === 'edit'">— اتركها فارغة إذا لا تريد تغييرها</small>
+            </label>
+            <div class="input-group">
+                <input [type]="showPassword ? 'text' : 'password'" class="form-control rd-input"
+                    formControlName="password" placeholder="••••••••" />
+                <button type="button" class="btn btn-outline-secondary" (click)="showPassword = !showPassword">
+                    <i [class]="showPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                </button>
+            </div>
+
+            <!-- Create mode: required error -->
+            <div class="rd-error"
+                *ngIf="mode === 'create' && ctrl('password').touched && ctrl('password').hasError('required')">
+                كلمة المرور مطلوبة.
+            </div>
+
+            <!-- Both modes: min length error (only when non-empty in edit) -->
+            <div class="rd-error" *ngIf="ctrl('password').touched && ctrl('password').hasError('minLenOptional')">
+                يجب أن تكون كلمة المرور ٨ أحرف على الأقل.
+            </div>
+        </div>
+
+        <!-- Roles selection -->
+        <div class="rd-field">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <label class="rd-label mb-0">الأدوار</label>
+
+                <!-- Lock notice if user currently has admin role -->
+                <span *ngIf="rolesLocked" class="badge bg-warning-subtle text-warning-emphasis">
+                    هذا المستخدم يملك دور مدير — لا يمكن تعديل الأدوار فيه
+                </span>
+            </div>
+
+            <!-- Create-mode note if no assignable roles exist -->
+            <div *ngIf="isCreateNoAssignableRoles" class="alert alert-warning py-2 px-3 mb-2">
+                لا توجد أدوار متاحة للاختيار (الأدوار المتوفرة كلها مدير).
+                <br>أنشئ دورًا جديدًا أولًا.
+            </div>
+
+            <div class="rd-chips">
+                <button type="button" class="rd-chip" *ngFor="let r of visibleRoles"
+                    [class.is-selected]="isRoleSelected(r.id)" [disabled]="rolesLocked || isCreateNoAssignableRoles"
+                    (click)="toggleRole(r.id)" [title]="r.name">
+                    {{ r.name }}
+                    <i *ngIf="r.isAdmin" class="ri-vip-crown-line ms-1 text-warning"></i>
+                </button>
+            </div>
+
+            <!-- Require at least one role when roles are editable and list exists -->
+            <div class="rd-error" *ngIf="!rolesLocked && !isCreateNoAssignableRoles && selectedRoleIds.size === 0">
+                يجب اختيار دور واحد على الأقل.
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="rd-actions">
+            <button type="button" class="btn btn-light" (click)="onCancel()">إلغاء</button>
+            <button type="submit" class="btn btn-primary"
+                [disabled]="form.invalid || (!rolesLocked && (isCreateNoAssignableRoles || selectedRoleIds.size === 0))">
+                حفظ
+            </button>
+        </div>
+    </form>
+</div>
