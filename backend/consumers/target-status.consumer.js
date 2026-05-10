@@ -2,6 +2,7 @@ const rabbit = require("/rabbitmq/rabbitmq");
 const logger = require("/logger/logger");
 const Target = require("../models/target.model");
 const { getIO } = require("../socketHub");
+const fs = require("fs");
 
 const QUEUE = process.env.TARGET_STATUS_QUEUE || "target_status_queue";
 
@@ -41,6 +42,16 @@ async function broadcast(targetDocOrLean, payload) {
     }
 }
 
+async function existsReadable(p) {
+    if (!p || p === "-") return false;
+    try {
+        await fs.promises.access(p, fs.constants.R_OK);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 module.exports = async function startStatusConsumer() {
     await rabbit.connect();
 
@@ -62,9 +73,20 @@ module.exports = async function startStatusConsumer() {
             if (status === "PROGRESS" && (phase === "LAUNCH" || phase === "TRAIN" || phase === "PREPROCESS")) {
                 next = { status: "STARTED_TRAINING", modelPath: "-", configPath: "-" };
             } else if (status === "SUCCESS") {
-                next = { status: "DONE", modelPath: modelPath || t.modelPath || "", configPath: configPath || t.configPath || "" };
+                const nextModelPath = modelPath || t.modelPath || "";
+                const nextConfigPath = configPath || t.configPath || "";
+                const artifactsReadable = await existsReadable(nextModelPath) && await existsReadable(nextConfigPath);
+                next = artifactsReadable
+                    ? { status: "DONE", modelPath: nextModelPath, configPath: nextConfigPath }
+                    : { status: "FAILED", modelPath: "", configPath: "" };
+                if (!artifactsReadable) {
+                    logger.warn(
+                        `⚠️ [status-consumer] SUCCESS for ${targetId} but artifacts are unreadable: ` +
+                        `model=${nextModelPath}, config=${nextConfigPath}`
+                    );
+                }
             } else if (status === "FAILED") {
-                next = { status: "FAILED", modelPath: "", configPath: configPath || t.configPath || "" };
+                next = { status: "FAILED", modelPath: "", configPath: "" };
             } else if (status === "CANCELLED") {
                 next = { status: "NOT_SCHEDULED", modelPath: "", configPath: "" };
             }

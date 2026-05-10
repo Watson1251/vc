@@ -1,5 +1,8 @@
 # nemo_engine.py
 from typing import Optional
+import os
+import tempfile
+import subprocess
 import torch
 import numpy as np
 from scipy.spatial.distance import cosine
@@ -38,9 +41,45 @@ class NemoEngine:
             self.speakernet_model = self.speakernet_model.half()
             self.titanet_model = self.titanet_model.half()
 
+    def _normalize_audio(self, audio_path: str) -> str:
+        """Convert arbitrary input audio to mono 16 kHz WAV for NeMo speaker models."""
+        fd, out_path = tempfile.mkstemp(prefix="nemo_audio_", suffix=".wav", dir="/tmp")
+        os.close(fd)
+        try:
+            subprocess.run(
+                [
+                    "ffmpeg", "-y", "-v", "error",
+                    "-i", audio_path,
+                    "-ac", "1",
+                    "-ar", "16000",
+                    "-sample_fmt", "s16",
+                    out_path,
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return out_path
+        except Exception:
+            try:
+                if os.path.exists(out_path):
+                    os.remove(out_path)
+            except Exception:
+                pass
+            raise
+
     @torch.no_grad()
     def get_embedding(self, audio_path: str) -> np.ndarray:
-        emb = self.speakernet_model.get_embedding(audio_path)
+        wav_path = self._normalize_audio(audio_path)
+        try:
+            emb = self.speakernet_model.get_embedding(wav_path)
+        finally:
+            try:
+                if os.path.exists(wav_path):
+                    os.remove(wav_path)
+            except Exception:
+                pass
         if isinstance(emb, torch.Tensor):
             emb = emb.detach().float().cpu().numpy()
         emb = np.asarray(emb).squeeze()
@@ -57,8 +96,18 @@ class NemoEngine:
 
     @torch.no_grad()
     def verify(self, audio_path_1: str, audio_path_2: str) -> bool:
-        decision = self.titanet_model.verify_speakers(audio_path_1, audio_path_2)
-        return bool(decision)
+        wav1 = self._normalize_audio(audio_path_1)
+        wav2 = self._normalize_audio(audio_path_2)
+        try:
+            decision = self.titanet_model.verify_speakers(wav1, wav2)
+            return bool(decision)
+        finally:
+            for p in (wav1, wav2):
+                try:
+                    if os.path.exists(p):
+                        os.remove(p)
+                except Exception:
+                    pass
 
     def device_info(self) -> str:
         if self.device.type == "cuda":

@@ -38,6 +38,21 @@ function isUnderUserRoot(p, userId) {
     return normalized.startsWith(root);
 }
 
+function isTrainingArtifactPath(p, userId) {
+    if (!p || !userId) return false;
+
+    const userRoot = path.normalize(path.join(MEDIA_ROOT, String(userId)));
+    const normalized = path.normalize(p);
+    const relative = path.relative(userRoot, normalized);
+    if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) return false;
+
+    const parts = relative.split(path.sep);
+    if (parts.length < 2 || !/^[a-f0-9]{24}$/i.test(parts[0])) return false;
+
+    // VC training writes durable artifacts here; they are not FileUpload rows.
+    return parts[1] === "model" || parts[1] === "embed" || parts[1] === ".seedvc.ws";
+}
+
 async function listFilesRecursive(dir, out = []) {
     const entries = await fs.promises.readdir(dir, { withFileTypes: true });
     for (const e of entries) {
@@ -105,7 +120,7 @@ async function garbageCollectUnlinkedFiles(userId) {
             .lean();
 
         const [targets, actions, sfx] = await Promise.all([
-            Target.find({ owner: userId }).select("referenceAudio trainingAudio").lean(),
+            Target.find({ owner: userId }).select("referenceAudio trainingAudio modelPath configPath").lean(),
             CloneAction.find({ owner: userId }).select("contentAudio referenceAudio outputPath modelPath configPath").lean(),
             ownerObjectId ? SoundEffect.find({ owner: ownerObjectId }).select("fileId").lean() : Promise.resolve([]),
         ]);
@@ -180,7 +195,7 @@ async function garbageCollectUnlinkedFiles(userId) {
             try {
                 const files = await listFilesRecursive(userRoot);
                 for (const f of files) {
-                    if (isSfxPath(f, userId)) continue;
+                    if (isSfxPath(f, userId) || isTrainingArtifactPath(f, userId)) continue;
                     const norm = path.normalize(f);
                     if (protectedPaths.has(norm)) continue;
 

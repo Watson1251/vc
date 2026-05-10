@@ -173,11 +173,21 @@ async function enqueueCloneByDoc(cloneActionDoc, ownerCtx, reqBody = {}) {
     const refPath = pickDiskPath(ca.referenceAudio);
     if (!contentPath || !(await existsReadable(contentPath))) throw new Error(AR.CONTENT_UNREADABLE);
     if (!refPath || !(await existsReadable(refPath))) throw new Error(AR.REF_UNREADABLE);
-    if (!(await existsReadable(modelPath)) || !(await existsReadable(configPath))) {
+    const owner = ownerSlugOf(ownerCtx);
+    const modelReadable = await existsReadable(modelPath);
+    const configReadable = await existsReadable(configPath);
+    if (!modelReadable || !configReadable) {
+        logger.warn(
+            `⚠️ Target ${ca.target?._id} has stale model paths: ` +
+            `model=${modelPath} readable=${modelReadable}, config=${configPath} readable=${configReadable}`
+        );
+        await Target.updateOne(
+            { _id: ca.target?._id, owner },
+            { $set: { status: "NOT_SCHEDULED", modelPath: "", configPath: "" } }
+        );
         throw new Error(AR.MODEL_UNREADABLE);
     }
 
-    const owner = ownerSlugOf(ownerCtx);
     // derive ../<targetRoot>/cloned from .../<targetId>/model/ft_model.pth
     const targetRoot = path.dirname(path.dirname(modelPath));
     const outputDir = path.join(targetRoot, 'cloned');
